@@ -1,98 +1,3 @@
-Grad = function(func, x)
-{
-# Numerical Gradient by Kyun-Seop Bae (ksbae@amc.seoul.kr)
-# Ref: Richardson Extrapolation
-# This is an optimized version for languages like C/C#/C++
-
-  n     = length(x)
-  x1    = vector(length=n)
-  x2    = vector(length=n)
-  ga    = vector(length=4)
-  gr    = vector(length=n)
-
-  for (i in 2:n) x1[i] = x2[i] = x[i]
-
-  for (i in 1:n) {
-    axi = abs(x[i])
-    if (axi <= 1) hi = 1e-4
-    else          hi = 1e-4 * axi
-
-    for (k in 1:4) {
-      x1[i] = x[i] - hi
-      x2[i] = x[i] + hi
-      ga[k] = (func(x2) - func(x1)) / (2*hi)
-      hi = hi / 2
-    }
-
-    ga[1] = (ga[2]*4  - ga[1]) / 3
-    ga[2] = (ga[3]*4  - ga[2]) / 3
-    ga[3] = (ga[4]*4  - ga[3]) / 3
-    ga[1] = (ga[2]*16 - ga[1]) / 15
-    ga[2] = (ga[3]*16 - ga[2]) / 15
-    gr[i] = (ga[2]*64 - ga[1]) / 63
-    x1[i] = x2[i] = x[i]
-  }
-
-  return(gr)
-}
-
-
-Hessian = function(func, x)
-{
-  n  = length(x)
-  h0 = vector(length=n)
-  x1 = vector(length=n)
-  x2 = vector(length=n)
-  ha = vector(length=4) # Hessian Approximation
-  H  = matrix(NA, nrow=n, ncol=n) # Hessian Matrix
-
-  f0 = func(x)
-
-  for (i in 1:n) {
-    x1[i] = x2[i] = x[i]
-    axi   = abs(x[i])
-    if (axi < 1) h0[i] = 1e-4
-    else         h0[i] = 1e-4 * axi
-  }
-
-  for (i in 1:n) {
-    for (j in i:1) {
-      hi = h0[i]
-      if (i==j) {
-        for (k in 1:4) {
-          x1[i] = x[i] - hi
-          x2[i] = x[i] + hi
-          ha[k] = (func(x1) - 2*f0 + func(x2)) / (hi*hi)
-          hi = hi / 2
-        }
-      } else {
-        hj = h0[j]
-        for (k in 1:4) {
-          x1[i] = x[i] - hi
-          x1[j] = x[j] - hj
-          x2[i] = x[i] + hi
-          x2[j] = x[j] + hj
-          ha[k] = (func(x1) - 2*f0 + func(x2) - H[i,i]*hi*hi - H[j,j]*hj*hj) / (2*hi*hj)
-          hi = hi / 2
-          hj = hj / 2
-        }
-      }
-      w = 4
-      for (m in 1:2) {
-        for (k in 1:(4-m)) ha[k] = (ha[k+1]*w - ha[k]) / (w - 1)
-        w = w * 4
-      }
-      H[i,j] = (ha[2]*64 - ha[1]) / 63
-      if (i != j) H[j,i] = H[i,j] 
-      x1[j] = x2[j] = x[j]
-    }
-    x1[i] = x2[i] = x[i]
-  }
-
-  return(H)
-}
-
-
 SqrtInvCov = function(M)
 {
   EigenResult = eigen(as.matrix(M))
@@ -100,6 +5,7 @@ SqrtInvCov = function(M)
   EigenValues = abs(EigenResult$values)
   return(EigenVector %*% diag(1/sqrt(EigenValues)) %*% t(EigenVector))
 }
+
 
 Mx = function(M, x)
 {
@@ -193,7 +99,7 @@ DECN = function(UCP)
 #        ThetaL[nTheta]==LB, ThetaI[nTheta]==IE, ThetaU[nTheta]==UB
 #        alpha, OMscl, SGscl
   uTheta = UCP[1:e$nTheta]
-  Theta = exp(uTheta - e$alpha)/(exp(uTheta - e$alpha) + 1)*(e$UB - e$LB)
+  Theta = exp(uTheta - e$alpha)/(exp(uTheta - e$alpha) + 1)*(e$UB - e$LB) + e$LB
   uvOM  = UCP[(e$nTheta + 1):(e$nTheta + e$nEta*(e$nEta + 1)/2)]
   umOM  = utv2mat(uvOM)
   OM    = DesclVar(umOM, e$OMscl)
@@ -205,4 +111,3 @@ DECN = function(UCP)
   dgSG  = diag(SG)
   return(c(Theta, ltvOM, dgSG))
 }
-

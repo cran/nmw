@@ -2,7 +2,7 @@
 \alias{CovStep}
 \title{Covariance Step}
 \description{
-It calculates standard erros and various variance matrices with the \code{e$FinalPara} after estimation step.
+It calculates standard errors and various variance matrices with the \code{e$FinalPara} after estimation step.
 }
 \usage{CovStep()}
 \details{

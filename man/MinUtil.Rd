@@ -1,6 +1,4 @@
 \name{MinUtil}
-\alias{Grad}
-\alias{Hessian}
 \alias{SqrtInvCov}
 \alias{Mx}
 \alias{mat2ltv}

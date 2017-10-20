@@ -1,8 +1,14 @@
 InitStep = function(DataAll, THETAinit, OMinit, SGinit, nTheta, LB=rep(0, nTheta), UB=rep(0, nTheta), Pred, METHOD=METHOD)
 {
-  e$PRED <- Pred
-  e$IDs <- unique(DataAll[,"ID"])
-  e$nID <- length(e$IDs)
+  e$METHOD = METHOD
+  if (METHOD == "ZERO") {
+    e$INTER = FALSE
+  } else {
+    e$INTER = TRUE
+  }
+  e$PRED = Pred
+  e$IDs = unique(DataAll[,"ID"])
+  e$nID = length(e$IDs)
   e$Oi = matrix(nrow=e$nID, ncol=3)
   colnames(e$Oi) = c("ID", "OFVi", "nRec")
 
@@ -14,10 +20,10 @@ InitStep = function(DataAll, THETAinit, OMinit, SGinit, nTheta, LB=rep(0, nTheta
     e$DataRef[[i]] = DATAi
   }
 
-  e$nTheta <- nTheta
-  e$nEta   <- dim(OMinit)[1]
-  e$nEps   <- dim(SGinit)[1]
-  e$nPara  <- e$nTheta + e$nEta*(e$nEta + 1)/2 + e$nEps  # Assume Full Block Omega
+  e$nTheta = nTheta
+  e$nEta   = dim(OMinit)[1]
+  e$nEps   = dim(SGinit)[1]
+  e$nPara  = e$nTheta + e$nEta*(e$nEta + 1)/2 + e$nEps  # Assume Full Block Omega
 
   e$GNames = vector()
   for (i in 1:e$nEta) e$GNames[i] = paste0("G",i)
@@ -35,16 +41,16 @@ InitStep = function(DataAll, THETAinit, OMinit, SGinit, nTheta, LB=rep(0, nTheta
   colnames(e$EBE) = c("ID", e$EtaNames)
 
   IE = THETAinit
-  e$alpha  <- 0.1 - log(IE/(UB - LB)/(1 - IE/(UB - LB)))
-  e$OMscl  <- ScaleVar(OMinit, e$nEta)
-  e$SGscl  <- ScaleVar(SGinit, e$nEps)
+  e$alpha  = 0.1 - log((IE - LB)/(UB - LB)/(1 - (IE - LB)/(UB - LB)))
+  e$OMscl  = ScaleVar(OMinit, e$nEta)
+  e$SGscl  = ScaleVar(SGinit, e$nEps)
 
-  e$METHOD <- METHOD
-  e$THETAinit <- THETAinit
-  e$OMinit <- OMinit
-  e$SGinit <- SGinit
-  e$LB     <- LB
-  e$UB     <- UB
-  e$OMindex <- (e$nTheta + 1):(e$nTheta + e$nEta*(e$nEta + 1)/2)
-  e$SGindex <- (e$nPara - e$nEps + 1):e$nPara
+  e$METHOD = METHOD
+  e$THETAinit = THETAinit
+  e$OMinit = OMinit
+  e$SGinit = SGinit
+  e$LB     = LB
+  e$UB     = UB
+  e$OMindex = (e$nTheta + 1):(e$nTheta + e$nEta*(e$nEta + 1)/2)
+  e$SGindex = (e$nPara - e$nEps + 1):e$nPara
 }

@@ -1,9 +1,10 @@
 CovStep = function()
 {
-  e$STEP <- "COV"
+  e$STEP = "COV"
   StartTime = Sys.time()
-  Rmat = Hessian(Obj, e$FinalPara)/2  # FinalPara from EstStep()
+  Rmat = hessian(Obj, e$FinalPara)/2
   Smat = CalcSmat()
+  if (is.nan(Smat[1,1])) stop("Error - NaN produced")
   invR = solve(Rmat)
   Cov = invR %*% Smat %*% invR
   SE = sqrt(diag(Cov))
