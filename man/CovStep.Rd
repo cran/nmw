@@ -7,7 +7,7 @@ It calculates standard errors and various variance matrices with the \code{e$Fin
 \usage{CovStep()}
 \details{
 Because \code{EstStep} uses nonlinear optimization, covariance step is separated from estimation step.
-It caculcates variance-covariance matrix of estimates on the original scale.
+It calculates variance-covariance matrix of estimates in the original scale.
 }
 \value{
   \item{Time}{consumed time}
@@ -16,8 +16,8 @@ It caculcates variance-covariance matrix of estimates on the original scale.
   \item{Correlation Matrix of Estimates}{correlation matrix of estimates in the order of theta, omega, and sigma}
   \item{Inverse Covariance Matrix of Estimates}{inverse covariance matrix of estimates in the order of theta, omega, and sigma}
   \item{Eigen Values}{eigen values of covariance matrix}
-  \item{R Matrix}{R matrix of NONMEM, second derivative of log likelihood function with respect to esimation parameters}
-  \item{S Matrix}{S matrix of NONMEM, sum of individual cross-product of first derivative of log likelihood function with respect to esimation parameters}
+  \item{R Matrix}{R matrix of NONMEM, the second derivative of log likelihood function with respect to estimation parameters}
+  \item{S Matrix}{S matrix of NONMEM, sum of individual cross-product of the first derivative of log likelihood function with respect to estimation parameters}
 }
 \references{NONMEM Users Guide}
 \author{Kyun-Seop Bae <k@acr.kr>}

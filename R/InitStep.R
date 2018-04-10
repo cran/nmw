@@ -1,11 +1,8 @@
-InitStep = function(DataAll, THETAinit, OMinit, SGinit, nTheta, LB=rep(0, nTheta), UB=rep(0, nTheta), Pred, METHOD=METHOD)
+InitStep = function(DataAll, THETAinit, OMinit, SGinit, LB, UB, Pred, METHOD)
 {
-  e$METHOD = METHOD
-  if (METHOD == "ZERO") {
-    e$INTER = FALSE
-  } else {
-    e$INTER = TRUE
-  }
+## Set default options for LB, UB
+# Calculate nTheta with length(THETAinit)
+
   e$PRED = Pred
   e$IDs = unique(DataAll[,"ID"])
   e$nID = length(e$IDs)
@@ -20,17 +17,13 @@ InitStep = function(DataAll, THETAinit, OMinit, SGinit, nTheta, LB=rep(0, nTheta
     e$DataRef[[i]] = DATAi
   }
 
-  e$nTheta = nTheta
+  e$nTheta = length(THETAinit)
   e$nEta   = dim(OMinit)[1]
   e$nEps   = dim(SGinit)[1]
   e$nPara  = e$nTheta + e$nEta*(e$nEta + 1)/2 + e$nEps  # Assume Full Block Omega
 
-  e$GNames = vector()
-  for (i in 1:e$nEta) e$GNames[i] = paste0("G",i)
-
-  e$HNames = vector()
-  for (i in 1:e$nEps) e$HNames[i] = paste0("H",i)
-
+  e$GNames = outer("G", 1:e$nEta, paste0)[1,]
+  e$HNames = outer("H", 1:e$nEps, paste0)[1,]
   e$DNames = vector()
   for (i in 1:e$nEta) for (j in 1:i) e$DNames = append(e$DNames, paste0("D",i,j))
 
@@ -46,11 +39,26 @@ InitStep = function(DataAll, THETAinit, OMinit, SGinit, nTheta, LB=rep(0, nTheta
   e$SGscl  = ScaleVar(SGinit, e$nEps)
 
   e$METHOD = METHOD
+  if (e$METHOD == "ZERO") {
+    e$INTER = FALSE
+  } else {
+    e$INTER = TRUE
+  }
+
   e$THETAinit = THETAinit
+  if (missing(LB)) {
+    e$LB   = rep(0, e$nTheta)
+  } else {
+    e$LB   = LB
+  }
+  if (missing(UB)) {
+    e$UB   = rep(1e6, e$nTheta)
+  } else {
+    e$UB   = UB
+  }
+
   e$OMinit = OMinit
   e$SGinit = SGinit
-  e$LB     = LB
-  e$UB     = UB
   e$OMindex = (e$nTheta + 1):(e$nTheta + e$nEta*(e$nEta + 1)/2)
   e$SGindex = (e$nPara - e$nEps + 1):e$nPara
 }

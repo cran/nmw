@@ -8,7 +8,15 @@
 This package explains 'First Order(FO) approximation' method, 'First Order Conditional Estimation(FOCE)' method, and 'Laplacian(LAPL)' method of NONMEM software.
 }
 \author{Kyun-Seop Bae <k@acr.kr>}
-\references{NONMEM Users guide}
+\references{
+\enumerate{  
+  \item NONMEM Users guide
+  \item Wang Y. Derivation of various NONMEM estimation methods. J Pharmacokinet Pharmacodyn. 2007.
+  \item Kang D, Bae K, Houk BE, Savic RM, Karlsson MO. Standard Error of Empirical Bayes Estimate in NONMEM(R) VI. K J Physiol Pharmacol. 2012.
+  \item Kim M, Yim D, Bae K. R-based reproduction of the estimation process hidden behind NONMEM Part 1: First order approximation method. 2015.
+  \item Bae K, Yim D. R-based reproduction of the estimation process hidden behind NONMEM Part 2: First order conditional estimation. 2016.
+}
+}
 \keyword{Population Pharmacokinetics}
 \keyword{Nonlinear Mixed Effects Modeling}
 \examples{
@@ -24,15 +32,14 @@ THETAinit = c(2, 50, 0.1)
 OMinit = matrix(c(0.2, 0.1, 0.1, 0.1, 0.2, 0.1, 0.1, 0.1, 0.2), nrow=nEta, ncol=nEta)
 SGinit = diag(c(0.1, 0.1))
 
-LB = rep(0, nTheta)
-UB = rep(1000000, nTheta)
+LB = rep(0, nTheta) # Lower bound
+UB = rep(1000000, nTheta) # Upper bound
 
 FGD = deriv(~DOSE/(TH2*exp(ETA2))*TH1*exp(ETA1)/(TH1*exp(ETA1) - TH3*exp(ETA3))*
              (exp(-TH3*exp(ETA3)*TIME)-exp(-TH1*exp(ETA1)*TIME)),
             c("ETA1","ETA2","ETA3"),
             function.arg=c("TH1", "TH2", "TH3", "ETA1", "ETA2", "ETA3", "DOSE", "TIME"),
-            func=TRUE,
-            hessian=(e$METHOD == "LAPL"))
+            func=TRUE, hessian=TRUE)
 H = deriv(~F + F*EPS1 + EPS2, c("EPS1", "EPS2"), function.arg=c("F", "EPS1", "EPS2"), func=TRUE)
 
 PRED = function(THETA, ETA, DATAi)
@@ -53,24 +60,26 @@ PRED = function(THETA, ETA, DATAi)
 }
 
 ####### First Order Approximation Method
-InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, nTheta=nTheta, 
-         LB=LB, UB=UB, Pred=PRED, METHOD="ZERO")
-(EstRes = EstStep())            # 4 sec
-(CovRes = CovStep())            # 2 sec
+InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=UB, 
+         Pred=PRED, METHOD="ZERO")
+(EstRes = EstStep())           # 4 sec
+(CovRes = CovStep())           # 2 sec
 PostHocEta() # Using e$FinalPara from EstStep()
+#TabStep()    # Commented out for the CRAN CPU time
 
 ######## First Order Conditional Estimation with Interaction Method
-#InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, nTheta=nTheta, 
-#         LB=LB, UB=UB, Pred=PRED, METHOD="COND")
-#(EstRes = EstStep())            # 4.64 min
-#(CovRes = CovStep())            # 1.14 min
+#InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=UB, 
+#         Pred=PRED, METHOD="COND")
+#(EstRes = EstStep())           # 2 min
+#(CovRes = CovStep())           # 1 min
 #get("EBE", envir=e)
-
+#TabStep()
 
 ######## Laplacian Approximation with Interacton Method
-#InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, nTheta=nTheta, 
-#         LB=LB, UB=UB, Pred=PRED, METHOD="LAPL")
-#(EstRes = EstStep())           # 4.53 min
-#(CovRes = CovStep())           # 1.09 min
+#InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=UB, 
+#         Pred=PRED, METHOD="LAPL")
+#(EstRes = EstStep())           # 4 min
+#(CovRes = CovStep())           # 1 min
 #get("EBE", envir=e)
+#TabStep()
 }

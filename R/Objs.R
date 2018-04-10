@@ -1,8 +1,8 @@
 # Objective Functions
 ObjEta = function(ETAi)
 {
-# External Variable : DATAi, THETA, invOM, SG, HNames
-# External Function : PRED
+# External Variable : e$INTER, e$DATAi, e$THETA, e$invOM, e$SG, e$nEta, e$HNames
+# External Function : e$PRED
   FGHDi = e$PRED(e$THETA, ETAi, e$DATAi)
   Ri    = e$DATAi[,"DV"] - FGHDi[,"F"]
   
@@ -143,7 +143,7 @@ Obj = function(vPara) # Calculate total OFV with vectorized parameter (THETA, OM
     for (i in 1:e$nID)  {
       e$DATAi = e$DataRef[[i]]
       e$nReci =- e$Oi[i, "nRec"]
-      Res     = optim(rep(0, e$nEta), ObjEta, method="BFGS") # ObjEta requires DATAi, THETA, invOM, SG, HNames # Regardless of "COV' or "EST" Step, use ObjEta
+      Res     = optim(e$EBE[i, e$EtaNames], ObjEta, method="BFGS") # ObjEta requires DATAi, THETA, invOM, SG, HNames # Regardless of "COV' or "EST" Step, use ObjEta
       e$ETAi  = as.matrix(Res$par, nrow=e$nEta)
       e$EBE[i, e$EtaNames] = Res$par
       e$Term123 = Term2 + Res$value                            # Oi requires Term123 for METHOD=="COND" or "LAPL"
