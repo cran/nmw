@@ -1,5 +1,14 @@
 \name{NEWS}
 \title{News for Package \pkg{nmw}}
+\section{Version 0.1.5 (2023-05-09)}{
+  \itemize{
+    \item{AddCox function for adding a covariate to existing NONMEM dataset.}
+    \item{CombDmExPc function for combining demogracphics(DM), dosing(EX), and DV(PC) tables.}
+    \item{TrimOut function to beutify the original NONMEM OUTPUT}
+    \item{Errata in manual corrected.}
+  }
+}
+
 \section{Version 0.1.4 (2018-04-10)}{
   \itemize{
     \item{Errata in manual corrected.}

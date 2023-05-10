@@ -121,7 +121,7 @@ Obj = function(vPara) # Calculate total OFV with vectorized parameter (THETA, OM
 
 # Oi requires  additionally with METHOD=="LAPL"
 #  invOM, Term123, DNames
-  if (e$STEP=="EST") {  # "EST" STEP requires DECN, vPara is UCP
+  if (e$STEP == "EST") {  # "EST" STEP requires DECN, vPara is UCP
     vPara = DECN(vPara)
   }
 
@@ -132,7 +132,7 @@ Obj = function(vPara) # Calculate total OFV with vectorized parameter (THETA, OM
   if (e$METHOD == "ZERO") {  # If METHOD=="ZERO", ETAi should be fixed as rep(0, nEta)
     e$ETAi = rep(0, e$nEta)
     for (i in 1:e$nID)  {
-      e$nReci <- e$Oi[i, "nRec"]
+      e$nReci = e$Oi[i, "nRec"]
       e$Oi[i, "OFVi"] = Oi0(i)  # Oi requires additionally with METHOD="ZERO":  OM, SG
     }
   } else {  # METHOD=="COND" or "LAPL"
@@ -142,7 +142,7 @@ Obj = function(vPara) # Calculate total OFV with vectorized parameter (THETA, OM
     Term2 = determinant(e$OM, logarithm=TRUE)$modulus[[1]]     # If METHOD=="COND" or "LAPL", Oi requires
     for (i in 1:e$nID)  {
       e$DATAi = e$DataRef[[i]]
-      e$nReci =- e$Oi[i, "nRec"]
+      e$nReci = -e$Oi[i, "nRec"]
       Res     = optim(e$EBE[i, e$EtaNames], ObjEta, method="BFGS") # ObjEta requires DATAi, THETA, invOM, SG, HNames # Regardless of "COV' or "EST" Step, use ObjEta
       e$ETAi  = as.matrix(Res$par, nrow=e$nEta)
       e$EBE[i, e$EtaNames] = Res$par
@@ -212,7 +212,7 @@ CalcSmat = function() # Calculate Smat with METHOD=="ZERO"
     e$DATAi = e$DataRef[[i]]
     e$ETAi  = e$EBE[i, e$EtaNames]
     e$nReci = e$Oi[i,"nRec"]
-    if (e$METHOD=="ZERO") {
+    if (e$METHOD == "ZERO") {
       gr = grad(OiS0, e$FinalPara)
     } else {
       gr = grad(OiS1, e$FinalPara)

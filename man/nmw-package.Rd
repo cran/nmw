@@ -59,13 +59,13 @@ PRED = function(THETA, ETA, DATAi)
   return(Res)
 }
 
-####### First Order Approximation Method
-InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=UB, 
-         Pred=PRED, METHOD="ZERO")
-(EstRes = EstStep())           # 4 sec
-(CovRes = CovStep())           # 2 sec
-PostHocEta() # Using e$FinalPara from EstStep()
-#TabStep()    # Commented out for the CRAN CPU time
+####### First Order Approximation Method # Commented out for the CRAN CPU time
+#InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=UB, 
+#         Pred=PRED, METHOD="ZERO")
+#(EstRes = EstStep())           # 4 sec
+#(CovRes = CovStep())           # 2 sec
+#PostHocEta() # Using e$FinalPara from EstStep()
+#TabStep()    
 
 ######## First Order Conditional Estimation with Interaction Method
 #InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=UB, 
