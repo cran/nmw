@@ -1,6 +1,6 @@
 \name{TrimOut}
 \alias{TrimOut}
-\title{Trimming and beutifying NONMEM original OUTPUT file}
+\title{Trimming and beautifying NONMEM original OUTPUT file}
 \description{
 TrimOut removes unnecessary parts from NONMEM original OUTPUT file.
 }
@@ -17,7 +17,7 @@ NONMEM original OUTPUT file contains unnecessary parts such as CONTROL file cont
 }
 \value{
   outFile will be written in the current working folder or designated folder.
-  Ths returns TRUE if the process was smooth.
+  This returns TRUE if the process was smooth.
 }
 \author{Kyun-Seop Bae <k@acr.kr>}
 \keyword{NONMEM OUTPUT}

@@ -75,7 +75,7 @@ PRED = function(THETA, ETA, DATAi)
 #get("EBE", envir=e)
 #TabStep()
 
-######## Laplacian Approximation with Interacton Method
+######## Laplacian Approximation with Interaction Method
 #InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=UB, 
 #         Pred=PRED, METHOD="LAPL")
 #(EstRes = EstStep())           # 4 min

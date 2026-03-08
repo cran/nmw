@@ -1,10 +1,16 @@
 \name{NEWS}
 \title{News for Package \pkg{nmw}}
+\section{Version 0.1.6 (2026-03-08)}{
+  \itemize{
+    \item{Typos in documentation corrected.}
+  }
+}
+
 \section{Version 0.1.5 (2023-05-09)}{
   \itemize{
     \item{AddCox function for adding a covariate to existing NONMEM dataset.}
-    \item{CombDmExPc function for combining demogracphics(DM), dosing(EX), and DV(PC) tables.}
-    \item{TrimOut function to beutify the original NONMEM OUTPUT}
+    \item{CombDmExPc function for combining demographics(DM), dosing(EX), and DV(PC) tables.}
+    \item{TrimOut function to beautify the original NONMEM OUTPUT}
     \item{Errata in manual corrected.}
   }
 }

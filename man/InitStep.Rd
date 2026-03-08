@@ -81,7 +81,7 @@ InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=U
 InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=UB,
          Pred=PRED, METHOD="COND")
 
-######### Laplacian Approximation with Interacton Method
+######### Laplacian Approximation with Interaction Method
 InitStep(DataAll, THETAinit=THETAinit, OMinit=OMinit, SGinit=SGinit, LB=LB, UB=UB,
          Pred=PRED, METHOD="LAPL")
 }
