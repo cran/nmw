@@ -3,9 +3,9 @@
 \alias{nmw}
 \docType{package}
 \title{Understanding Nonlinear Mixed Effects Modeling for Population Pharmacokinetics}
-\description{This shows how NONMEM(R) <http://www.iconplc.com/innovation/nonmem/> software works.}
+\description{This shows how NONMEM(R) <http://www.iconplc.com/innovation/nonmem/> software works. Additionally, provides functions for post-run processing of NONMEM output files, generating comprehensive PDF diagnostic reports.}
 \details{
-This package explains 'First Order(FO) approximation' method, 'First Order Conditional Estimation(FOCE)' method, and 'Laplacian(LAPL)' method of NONMEM software.
+This package explains 'First Order(FO) approximation' method, 'First Order Conditional Estimation(FOCE)' method, and 'Laplacian(LAPL)' method of NONMEM software. It also provides post-run processing functions including PDF diagnostic reports for OFV analysis, parameter estimates, prediction diagnostics, residual diagnostics, EBE analysis, input data summary, and individual PK parameter distributions.
 }
 \author{Kyun-Seop Bae <k@acr.kr>}
 \references{

@@ -3,7 +3,7 @@ SqrtInvCov = function(M)
   EigenResult = eigen(as.matrix(M))
   EigenVector = EigenResult$vectors
   EigenValues = abs(EigenResult$values)
-  return(EigenVector %*% diag(1/sqrt(EigenValues)) %*% t(EigenVector))
+  return(EigenVector %*% diag(1/sqrt(EigenValues), nrow = dim(M)[1]) %*% t(EigenVector))
 }
 
 

@@ -1,5 +1,14 @@
 \name{NEWS}
 \title{News for Package \pkg{nmw}}
+\section{Version 0.2.0 (2026-03-08)}{
+  \itemize{
+    \item{Post-run processing of NONMEM output with PDF diagnostic reports merged from nma package.}
+    \item{8 report types: OFV, Parameters, Predictions, Residuals, EBE, Input, Output, IndiPK.}
+    \item{New utility functions for NONMEM data processing and parsing.}
+    \item{Switched from exportPattern to explicit exports in NAMESPACE.}
+  }
+}
+
 \section{Version 0.1.6 (2026-03-08)}{
   \itemize{
     \item{Typos in documentation corrected.}

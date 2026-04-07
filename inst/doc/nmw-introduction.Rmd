@@ -1,0 +1,293 @@
+---
+title: "nmw: NONMEM Post-Run Processing"
+author: "Kyun-Seop Bae"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{nmw: NONMEM Post-Run Processing}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Overview
+
+`nmw` package는 NONMEM 실행 결과에 대한 post-run processing을 수행합니다.
+NONMEM run directory의 output 파일들을 읽어 총 8종의 진단 PDF 보고서를 자동 생성합니다.
+
+### 생성되는 보고서
+
+| 보고서 | 파일명 | 내용 |
+|--------|--------|------|
+| S1-OFV | S1-OFV.PDF | Objective Function Value 진단 |
+| S2-Parameters | S2-Parameters.PDF | 모수 추정값 및 표준오차 |
+| S3-Predictions | S3-Predictions.PDF | 예측 진단 (DV vs PRED, IPRE) |
+| S4-Residuals | S4-Residuals.PDF | 잔차 진단 (WRES, CWRES, IWRES) |
+| S5-EBE | S5-EBE.PDF | Empirical Bayes Estimate 진단 |
+| SA-Input | SA-Input.PDF | 입력 데이터 요약 |
+| SB-Output | SB-Output.PDF | NONMEM output 파일 내용 |
+| SC-IndiPK | SC-IndiPK.PDF | 개체별 약동학 파라미터 |
+
+
+## Installation
+
+```{r install}
+install.packages("path/to/nmw_0.1.0", repos = NULL, type = "source")
+```
+
+## Quick Start
+
+### 전체 보고서 생성
+
+```{r basic}
+library(nmw)
+
+# NONMEM run directory 경로를 지정하여 전체 보고서 생성
+nmw_run("/path/to/nonmem/run/2006.R75")
+```
+
+`run_dir`에는 NONMEM 실행이 완료된 디렉토리 경로를 지정합니다.
+해당 디렉토리에 `.xml`, `.ext`, `.grd`, `.phi`, `sdtab`, `patab`, `cotab`,
+`FDATA.CSV`, `PRINT.OUT` 등의 파일이 존재해야 합니다.
+
+### 선택적 보고서 생성
+
+```{r selective}
+# OFV와 파라미터 보고서만 생성
+nmw_run("/path/to/run", reports = c("ofv", "param"))
+
+# 잔차와 EBE 보고서만 생성
+nmw_run("/path/to/run", reports = c("resid", "ebe"))
+```
+
+### 개별 보고서 함수
+
+각 보고서를 개별적으로 생성할 수도 있습니다:
+
+```{r individual}
+# S1-OFV.PDF
+nmw_report_ofv(run_dir = "/path/to/run")
+
+# S2-Parameters.PDF
+nmw_report_param(run_dir = "/path/to/run")
+
+# S3-Predictions.PDF
+nmw_report_pred(run_dir = "/path/to/run")
+
+# S4-Residuals.PDF
+nmw_report_resid(run_dir = "/path/to/run")
+
+# S5-EBE.PDF
+nmw_report_ebe(run_dir = "/path/to/run")
+
+# SA-Input.PDF
+nmw_report_input(run_dir = "/path/to/run")
+
+# SB-Output.PDF
+nmw_report_output(run_dir = "/path/to/run")
+
+# SC-IndiPK.PDF
+nmw_report_indipk(run_dir = "/path/to/run")
+```
+
+
+## 보고서 상세 내용
+
+### S1-OFV: Objective Function Value 진단
+
+- Total OFV, AICc, BIC
+- Condition number
+- 개체별 OFV/DV의 box plot, histogram, Q-Q plot
+- Shapiro-Wilk 정규성 검정
+- Gradient 분석
+
+### S2-Parameters: 모수 추정값
+
+- THETA, OMEGA, SIGMA 추정값 및 표준오차
+- Wald-type significance test
+- Unitary test
+- OMEGA matrix의 plausibility 검토
+- Correlation matrix
+
+### S3-Predictions: 예측 진단
+
+- Superposed fitting curve (DV, PRED, IPRE vs TaLD)
+- DV vs PRED, DV vs IPRE scatter plot
+- 개체별 fitting curve (DV, PRED, IPRE vs TIME)
+- Log scale 포함
+- Run test 결과 표시
+
+### S4-Residuals: 잔차 진단
+
+- WRES, IWRES, CWRES vs PRED, IPRE, TIME
+- 절대 잔차 vs PRED, IPRE, TIME
+- 잔차의 histogram 및 정규성 검정
+- Epsilon shrinkage
+- Mean percent residual
+- Run test
+
+### S5-EBE: Empirical Bayes Estimate 진단
+
+- ETA의 histogram, Q-Q plot, 정규성 검정
+- Population shrinkage
+- ETA vs covariates (전체 및 개별 pair plot)
+- Correlation matrix
+- Multiple linear regression (Cook's Distance, DFFITS, COVRATIO, DFBETAS)
+- 개체별 PK 파라미터의 histogram 및 요약 통계
+- Individual shrinkage
+
+### SA-Input: 입력 데이터 요약
+
+- 투여 기록 없는 개체, DV 없는 개체 탐지
+- 중복 레코드 검출
+- 변수별 요약 통계
+- 범주형/연속형 변수 구분
+
+### SB-Output: NONMEM Output
+
+- Control file 내용 (줄 번호 포함)
+- NONMEM output 파일 내용
+
+### SC-IndiPK: 개체별 약동학 파라미터
+
+- 개체별 PK 파라미터 분포
+- Histogram 및 요약 통계
+- CV% 계산
+
+
+## Utility Functions
+
+패키지에는 보고서 외에도 유용한 유틸리티 함수들이 포함되어 있습니다.
+
+### 데이터 처리
+
+```{r utils}
+# Dose Number, Time of Latest Dose, Time after Latest Dose 추가
+FDATA <- read.csv("FDATA.CSV", skip = 2)
+FDATA <- AddDoNoTaLD(FDATA)
+
+# ADDL/II 레코드 확장
+FDATA_expanded <- ExpandDoseHist(FDATA)
+
+# NA 행 제거
+FDATA_clean <- RemoveNA(FDATA, "DV")
+```
+
+### NONMEM 파일 파싱
+
+```{r parse}
+# XML에서 태그 값 추출
+XML <- readLines("model.xml")
+vals <- BtwTagVals("theta", XML)
+mat <- BtwTagMat("omega", XML)
+
+# .ext 파일에서 OFV 추출
+setwd("/path/to/run")
+ofv <- GetOFV()
+
+# 추정 방법 확인
+method <- GetEstMethod()
+
+# AICc 계산
+aicc <- GetAICc()
+
+# 파라미터 수 확인
+n_theta <- GetCountPara()
+n_eta <- GetCountEta()
+n_eps <- GetCountEps()
+n_obs <- GetCountObs()
+```
+
+### 통계 검정
+
+```{r tests}
+# Run test
+run.test.nm(residuals)
+
+# 잔차 검정 (Shapiro-Wilk + Run test)
+ResTest(residuals)
+
+# Multiple linear regression with influence diagnostics
+result <- mlr2(dat, y_col, x_cols)
+```
+
+### 모델 개발 요약
+
+```{r summary}
+# 여러 NONMEM run의 요약 비교
+MDL <- SumOut(FileExt = ".CTL", RunExt = ".R75", OutExt = ".OUT")
+
+# 모델 개발 흐름도 그리기
+Outline(MDL, MDLName = "ProjectName")
+```
+
+### EBE Pair Plot
+
+```{r ebepair}
+# ETA vs Covariates pair plot
+EBEpair(tabEta, RunNumber = "2006")
+
+# 개별 covariate별 pair plot
+EBEpair(tabEta, RunNumber = "2006", each = TRUE)
+```
+
+### PDF 보고서 직접 작성
+
+```{r pdf}
+# PDF 생성
+PrepPDF("MyReport.PDF")
+
+# 텍스트 출력
+PrinTxt("Title Text", Cex = 1.2)
+
+# 여러 줄 텍스트 출력
+PrinMTxt(capture.output(summary(data)), Header1 = "Data Summary")
+
+# 페이지 추가
+AddPage()
+
+# PDF 닫기
+ClosePDF()
+```
+
+
+## 필요한 NONMEM Output 파일
+
+`nmw_run()` 실행을 위해 run directory에 다음 파일들이 필요합니다:
+
+| 파일 | 설명 | 사용 보고서 |
+|------|------|------------|
+| `{model}.xml` | NONMEM XML output | 전체 |
+| `{model}.ext` | 추정값 파일 | S1, S2 |
+| `{model}.grd` | Gradient 파일 | S1 |
+| `{model}.phi` | 개체별 파라미터 파일 | S1, S5, SC |
+| `sdtab` | Standard table (DV, PRED, IPRE, WRES 등) | S3, S4 |
+| `patab` | Parameter table (ETA, 개체별 PK 파라미터) | S5, SC |
+| `cotab` | Covariate table | S5 |
+| `FDATA.CSV` | 입력 데이터 | SA |
+| `PRINT.OUT` | NONMEM print output | SB |
+
+### Run Directory 명명 규칙
+
+Run directory 이름은 `{ModelName}.{Extension}` 형식이어야 합니다.
+예: `2006.R75` (ModelName = "2006", Extension = "R75")
+
+패키지는 디렉토리 이름에서 모델 이름을 추출하여 해당 `.xml`, `.ext` 등의
+파일을 찾습니다.
+
+
+## NONMEM Control File 규칙
+
+이 패키지는 아래와 같은 NONMEM control file 작성 규칙을 따를 때 정상 동작합니다:
+
+- `$PROBLEM` 행에 `P:` 태그로 parent model 지정 (예: `P:1001`)
+- `$PROBLEM` 행에 `F:` 태그로 formula 지정 (예: `F:CL~WT`)
+- `sdtab`, `patab`, `cotab` 파일명 사용
+- `FDATA.CSV` 형식의 입력 데이터 (2행 skip)
