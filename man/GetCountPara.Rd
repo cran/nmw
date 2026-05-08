@@ -7,7 +7,7 @@
 GetCountPara()
 }
 \value{
-integer, total number of estimated parameters
+integer, total number of estimated parameters, or NA if file not found
 }
 \description{
 Get Count of Parameters

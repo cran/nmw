@@ -7,14 +7,9 @@
 ReadEXTFile()
 }
 \value{
-data.frame of the .ext file contents, or \code{NULL} if the file
-is not found in the current directory.
+data.frame or NULL if file not found
 }
 \description{
-Reads the NONMEM .ext file corresponding to the current model
-(detected by \code{GetCurModelName()}). This is a shared helper
-used by \code{GetCountAllTheta()}, \code{GetCountEps()},
-\code{GetCountOmega()}, and \code{GetCountUnfixedEps()} to avoid
-repeated file-reading logic.
+Read EXT File from Current Directory
 }
 \keyword{internal}

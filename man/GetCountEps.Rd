@@ -7,7 +7,7 @@
 GetCountEps()
 }
 \value{
-integer, number of epsilon parameters
+integer, number of epsilon parameters, or NA if file not found
 }
 \description{
 Get Count of Epsilons

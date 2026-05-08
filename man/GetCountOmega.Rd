@@ -7,7 +7,7 @@
 GetCountOmega()
 }
 \value{
-integer
+integer, or NA if file not found
 }
 \description{
 Get Count of Unfixed Omega Elements

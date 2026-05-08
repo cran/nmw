@@ -7,24 +7,14 @@
 CalcTaLDForReport(FDATA, nRec)
 }
 \arguments{
-\item{FDATA}{data.frame of NONMEM data. Must contain ID, TIME, AMT, MDV columns.
-Optionally ADDL and II columns for expanded dosing.}
+\item{FDATA}{data.frame of NONMEM data}
 
-\item{nRec}{integer, number of records in FDATA}
+\item{nRec}{integer, number of records}
 }
 \value{
-list with components:
-\describe{
-  \item{ToLD}{numeric vector, time of latest dose for each record}
-  \item{TaLD}{numeric vector, time after latest dose for each record}
-  \item{DOCC}{numeric vector, dosing occasion count for each record}
-  \item{NewID}{numeric vector, ID with fractional dosing occasion (ID + DOCC/100)}
-}
+list with ToLD, TaLD, DOCC, NewID vectors
 }
 \description{
-Calculates dosing occasion information for each record in NONMEM data.
-Handles ADDL/II dose expansion when those columns are present.
-This is a shared helper used by \code{report_pred.R} and \code{report_resid.R}
-to avoid code duplication.
+Shared logic between report_pred.R and report_resid.R.
 }
 \keyword{internal}

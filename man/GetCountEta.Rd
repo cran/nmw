@@ -7,7 +7,7 @@
 GetCountEta()
 }
 \value{
-integer, number of eta parameters
+integer, number of eta parameters, or NA if file not found
 }
 \description{
 Get Count of Etas

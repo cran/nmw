@@ -14,38 +14,20 @@ PlotDistribution(
 )
 }
 \arguments{
-\item{var.data}{numeric vector of data to plot}
+\item{var.data}{numeric vector of data}
 
-\item{var.name}{character, variable name used for axis labels and title}
+\item{var.name}{character, variable name for labeling}
 
-\item{show_shrinkage}{logical, whether to display shrinkage annotation
-(requires \code{omega_var})}
+\item{show_shrinkage}{logical, whether to show shrinkage}
 
-\item{omega_var}{numeric, omega variance value for shrinkage calculation.
-Only used when \code{show_shrinkage = TRUE}.}
+\item{omega_var}{numeric, omega variance for shrinkage calc}
 
-\item{show_ttest}{logical, whether to display the t-test p-value
-in the summary panel}
+\item{show_ttest}{logical, whether to show t-test p-value}
 
-\item{show_cv}{logical, whether to display the coefficient of variation
-(CV percent) in the summary panel}
+\item{show_cv}{logical, whether to show CV percent}
 }
 \description{
-Generates a 3-panel distribution diagnostic plot consisting of:
-\enumerate{
-  \item Summary statistics text (min, Q1, median, mean, Q3, max, SD)
-  \item Histogram with kernel density overlay and Shapiro-Wilk test
-  \item Normal Q-Q plot
-}
-This is a common pattern shared across \code{report_ebe.R},
-\code{report_indipk.R}, and \code{report_resid.R}.
-}
-\details{
-The function expects that the graphics device is already open and
-\code{par()} has been set for a multi-panel layout (e.g., \code{mfrow}).
-Each call to this function fills 3 panels (one row of a typical layout).
-
-The Shapiro-Wilk test is only performed when the data has positive
-standard deviation and fewer than 5000 observations.
+Common 3-panel distribution plot used in report_ebe.R,
+report_indipk.R, and report_resid.R.
 }
 \keyword{internal}

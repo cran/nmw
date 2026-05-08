@@ -7,21 +7,14 @@
 MergeIDStatOFV(FDATA, PHI)
 }
 \arguments{
-\item{FDATA}{data.frame of NONMEM data (from \code{ReadFDATA()})}
+\item{FDATA}{data.frame of NONMEM data}
 
-\item{PHI}{data.frame from the .phi file, must contain ID and OBJ columns}
+\item{PHI}{data.frame from .phi file}
 }
 \value{
-list with components:
-\describe{
-  \item{IDStat3}{data.frame, merged individual statistics with OFV}
-  \item{VarStat}{matrix, variable statistics from \code{NMVarStat()}}
-  \item{IDStat}{list, individual statistics from \code{NMIDStat()}}
-}
+list with IDStat3 (merged), VarStat, IDStat
 }
 \description{
-Computes variable and individual statistics from NONMEM data,
-then merges individual OFV values from the PHI file. This is a
-common pattern used in \code{report_ofv.R} and \code{report_resid.R}.
+Common pattern used in report_ofv.R and report_resid.R.
 }
 \keyword{internal}

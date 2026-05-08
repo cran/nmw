@@ -1,5 +1,16 @@
 \name{NEWS}
 \title{News for Package \pkg{nmw}}
+\section{Version 0.3.0 (2026-05-08)}{
+  \itemize{
+    \item{General-purpose helpers for NONMEM dataset construction added (\code{build_nm_dataset}, \code{build_dose_records}, \code{build_obs_records}).}
+    \item{Time-varying covariate merge by LOCF/LOCB: \code{locf_value}, \code{merge_cov_locf}.}
+    \item{Datetime parsers: \code{parse_dtc}, \code{dat2_time_to_posix}.}
+    \item{Coding helpers: \code{code_sex}, \code{code_race}.}
+    \item{Cockcroft-Gault CRCL: \code{crcl_cg}, \code{add_crcl_cg}.}
+    \item{Mass to molar unit conversion: \code{nm_to_molar}.}
+  }
+}
+
 \section{Version 0.2.0 (2026-03-08)}{
   \itemize{
     \item{Post-run processing of NONMEM output with PDF diagnostic reports merged from nma package.}

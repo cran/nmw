@@ -7,25 +7,12 @@
 CountEXTParams(EXT)
 }
 \arguments{
-\item{EXT}{data.frame from .ext file (already read and filtered)}
+\item{EXT}{data.frame from .ext file (already read)}
 }
 \value{
-list with components:
-\describe{
-  \item{nTheta}{integer, number of THETA columns}
-  \item{nEta}{integer, number of ETAs (derived from OMEGA elements)}
-  \item{nEps}{integer, number of EPSILONs (derived from SIGMA elements)}
-}
+list with nTheta, nEta, nEps
 }
 \description{
-Counts the number of THETA, OMEGA, and SIGMA parameters from
-column names of a NONMEM .ext file data frame. Derives the number
-of ETAs and EPSILONs from the lower-triangular element count
-using the formula \code{n = (sqrt(1 + 8k) - 1) / 2}.
-}
-\details{
-This function replaces duplicated parameter counting loops that
-were previously repeated in \code{report_ebe.R}, \code{report_ofv.R},
-and \code{report_param.R}.
+Count THETA, ETA, EPS Parameters from EXT Data Frame
 }
 \keyword{internal}

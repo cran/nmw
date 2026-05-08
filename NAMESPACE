@@ -25,6 +25,20 @@ export(mat2ltv)
 export(mat2utv)
 export(utv2mat)
 
+# Exports from nmw_0.3.0 (NM dataset construction helpers)
+export(add_crcl_cg)
+export(build_dose_records)
+export(build_nm_dataset)
+export(build_obs_records)
+export(code_race)
+export(code_sex)
+export(crcl_cg)
+export(dat2_time_to_posix)
+export(locf_value)
+export(merge_cov_locf)
+export(nm_to_molar)
+export(parse_dtc)
+
 # Exports from nma_0.1.0 (post-run processing)
 export(AddDoNoTaLD)
 export(AddPage)
@@ -76,6 +90,6 @@ importFrom(graphics, plot, lines, text, par, hist, boxplot, pairs, mtext,
            strwidth)
 importFrom(stats, density, shapiro.test, t.test, anova, lm, formula, cor,
            cov, cov2cor, lowess, qnorm, pnorm, qbinom, pbinom, sd, var,
-           pt, qqnorm, setNames, optim)
+           pt, qqnorm, setNames, optim, median)
 importFrom(utils, read.table, read.csv, read.fwf, write.csv, capture.output,
            head, tail)

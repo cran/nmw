@@ -1,5 +1,5 @@
 Package: nmw
-Version: 0.2.0
+Version: 0.3.0
 Title: Understanding Nonlinear Mixed Effects Modeling for Population
         Pharmacokinetics
 Description: This shows how NONMEM(R) software works. NONMEM's classical
@@ -27,6 +27,6 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 NeedsCompilation: no
 RoxygenNote: 7.3.3
-Packaged: 2026-03-15 02:57:29 UTC; Kyun-SeopBae
+Packaged: 2026-05-08 03:31:18 UTC; Kyun-SeopBae
 Repository: CRAN
-Date/Publication: 2026-04-07 05:20:08 UTC
+Date/Publication: 2026-05-08 03:50:18 UTC

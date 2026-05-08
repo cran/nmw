@@ -7,7 +7,7 @@
 GetCountAllTheta()
 }
 \value{
-integer, total number of thetas
+integer, total number of thetas, or NA if file not found
 }
 \description{
 Get Count of All Thetas
