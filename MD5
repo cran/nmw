@@ -1,4 +1,4 @@
-509efee46e2af74b8cc7ca2fc8d82291 *DESCRIPTION
+bb101331dd47ef88360cf0c975b69dfd *DESCRIPTION
 e6611af56feb6f21dae063c952a9e235 *NAMESPACE
 d3c5e656847f23dd0ee0cd7cd95f4cb9 *R/AddCox.R
 716ff83d8dc2d2f6d19d4407b43f9d29 *R/CombDmExPc.R
@@ -12,14 +12,14 @@ bfde8d414d29f0b05b99de48ed448d21 *R/TabStep.R
 20157011fc2b126cb2c6880a186e07a0 *R/nm_helpers.R
 a46da52d8cf3a5f98e15ccabd7ff62bb *R/nm_math.R
 db1acde5df90ef75c2e3fd4270ea725f *R/nm_parse.R
-9d66154811bc8144ff648c741063e9a2 *R/nm_read.R
+cb42b972bc94b0efa197e190ad9875a6 *R/nm_read.R
 801b91e6009cca3e5868b1ca4bb2d78f *R/nm_stats.R
-30fdb759b8ad522feef2532c2792c1ac *R/nm_summary.R
+f6997d2417d2d901a8fbeabed2376cf6 *R/nm_summary.R
 db4b9ac24b71acf4fe19cfbbe1724ecc *R/nm_tests.R
 d75e5cfd9fe046d72f4d72f23c9b2a09 *R/nmw_run.R
 6ee80de0167305330900edfd8aea1900 *R/pdf_report.R
 6549040c79953f5b8f257aa7c1ab0225 *R/plot_pairs.R
-900f322b1ec3c45b944dc4325286fdc5 *R/report_ebe.R
+8af44c47badd2e95971b775dd6f9bb00 *R/report_ebe.R
 72ead5703e4dda6719e14cbef0cdbecc *R/report_indipk.R
 39db88c5d3e01c0ac4a137ba6642642d *R/report_input.R
 1162be7b8d7e827fdaa5c5d329d044aa *R/report_ofv.R
@@ -30,8 +30,8 @@ c98664a0586fa5be4a38179c9962f20b *R/report_pred.R
 19a512c05864cf9902bc49335917912b *R/sysdata.rda
 76bc116c8d4dfc9633bdda31688febff *R/utils_data.R
 d97814aeb8e5118b756722622c58d189 *R/utils_report.R
-eb5555e90e3f811f48fb52f0be9ce384 *R/utils_string.R
-c550b2aa8780d22287eb1faa9de66281 *inst/NEWS.Rd
+5e07afd66f031081e25aa5d6e327cfe6 *R/utils_string.R
+c90f94c71049491bbf4b6df650cfd58f *inst/NEWS.Rd
 593023d2e4474d1aa7aaee3376e634f4 *inst/doc/THEO-FO.CTL
 4c4b0de52e5348e469de6f4b14efcea5 *inst/doc/THEO-FO.OUT.txt
 cbb430f878ecdb20c4bac3b67bb8d621 *inst/doc/THEO-FOCEI.CTL
@@ -126,7 +126,7 @@ c1858dca90cde0bae776a63aac7ceb90 *man/ReadFDATA.Rd
 e9468152d03510209ca86b5c1c2ff756 *man/RmvFixed.Rd
 63aac86a4df3f3d2d8bd1039d5c7fde2 *man/RmvZero.Rd
 ffaa0e990e64e94f4aaa87852b064a71 *man/SESuccess.Rd
-600794f38c721f880e9798a833b312e7 *man/SumOut.Rd
+fa95b2fcaaec37042dc372455a616aae *man/SumOut.Rd
 32241ffde63e7696f06e91cdb0c47aa7 *man/SumOut1.Rd
 980d3c3bb8115e15278c063a15076f08 *man/TabStep.Rd
 c41abab5ba740e096c827603cf809a75 *man/TrimOut.Rd
@@ -156,9 +156,3 @@ cedc8353204b8ff085e3d86cd1ea45d2 *man/nmw_report_resid.Rd
 1abc73772b287c89fa08478b1a730d04 *man/parse_dtc.Rd
 53651ed6aa08029c79edef78d2d3cc0b *man/run.p.Rd
 7bd1402c709b7b57ad8c5191c93a6526 *man/run.test.nm.Rd
-c36ffa156849b89bcdee9800b56dc0fb *tests/testthat.R
-6fbffa12993efc5a5656366fb8c912e2 *tests/testthat/test-MinUtil.R
-07aff25064b3762b4db9bba5395a7526 *tests/testthat/test-nm_stats.R
-efe89b1f8c3c3d6d95a07566dd94d1e3 *tests/testthat/test-nm_tests.R
-c2b5733f2306290b3df118a4e1adb0ba *tests/testthat/test-utils_data.R
-89eef37d6fb0867bbc8620d196079687 *tests/testthat/test-utils_report.R

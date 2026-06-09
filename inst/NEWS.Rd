@@ -1,5 +1,18 @@
 \name{NEWS}
 \title{News for Package \pkg{nmw}}
+\section{Version 0.3.1 (2026-06-09)}{
+  \itemize{
+    \item{\code{SumOut()} bug fix: the line \code{RunFolders <- MatchEnd(Folders, RunExt)} previously assigned the logical vector returned by \code{MatchEnd()} to \code{RunFolders} instead of using it as a mask to subset \code{Folders}.  This caused \code{strsplit()} inside \code{GetModelNames()} to fail with "non-character argument" whenever any run folders were present.  Now \code{RunFolders <- Folders[MatchEnd(Folders, RunExt)]}.}
+    \item{\code{SumOut()} default \code{RunExt} changed from \code{".R75"} to \code{".R76"} to match NONMEM 7.6 (the current production release).  Users on NONMEM 7.5 should pass \code{RunExt = ".R75"} explicitly.}
+    \item{\code{SumOut()} now warns and returns \code{invisible(NULL)} when no matching run folders are found, instead of erroring on a zero-length loop.}
+    \item{\code{GetProbVal()} bug fix: \code{grep(Tag, PROB)} returns \code{integer(0)} when the requested tag (e.g. \code{"P:"} or \code{"F:"}) is absent — for example when the \code{$PROB} record is longer than 80 characters and NM-TRAN truncates it inside the \code{FCON} file, dropping the tag.  The previous \code{if (Loc > 0)} test raised "argument is of length zero".  The test was changed to \code{if (length(Loc) > 0 && Loc[1] > 0)}, returning an empty string when the tag is absent.}
+    \item{\code{man/SumOut.Rd} updated to reflect the new default \code{RunExt} and a richer description of the return value.}
+    \item{\code{MatchEnd()} bug fix: replaced \code{for (i in 1:n)} with \code{for (i in seq_len(n))} so that calling on an empty character vector no longer iterates over \code{c(1, 0)} and tries to read \code{NA} elements.}
+    \item{Regression tests added in \code{tests/testthat/test-utils_data.R} covering the \code{SumOut()} empty-folder, \code{GetProbVal()} missing-tag, and \code{MatchEnd()} empty-input cases.}
+    \item{\code{report_ebe()} (S5 \dQuote{ETA vs Categorical Variables}) bug fix: when the number of ETAs times the number of categorical covariates produced a panel grid too dense for boxplot margins, \code{plot.new()} raised \dQuote{figure margins too large} and the PDF was truncated mid-page.  The categorical-covariate panels are now split across multiple PDF pages (cap of ~35 panels per page, configurable through the internal \code{MAX_CELLS_PER_PAGE} constant), with page numbers appended to the panel title when more than one page is produced.}
+  }
+}
+
 \section{Version 0.3.0 (2026-05-08)}{
   \itemize{
     \item{General-purpose helpers for NONMEM dataset construction added (\code{build_nm_dataset}, \code{build_dose_records}, \code{build_obs_records}).}

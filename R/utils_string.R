@@ -17,7 +17,9 @@ MatchEnd <- function(vName0, End0, IgnoreCase = TRUE) {
   vRet <- rep(FALSE, n)
   nc1 <- nchar(End)
 
-  for (i in 1:n) {
+  # FIX (v0.3.2): use seq_len(n) instead of 1:n so that empty input
+  # does not iterate over c(1, 0) and access NA elements.
+  for (i in seq_len(n)) {
     nc2 <- nchar(vName[i])
     if (nc2 >= nc1) {
       if (substring(vName[i], nc2 - nc1 + 1, nc2) == End) {

@@ -105,18 +105,29 @@ SumOut1 <- function(ModelName) {
 #' Scans subdirectories matching RunExt and collects summary metrics
 #' for model development flow analysis.
 #'
-#' @param FileExt character, control file extension
-#' @param RunExt character, run folder extension
-#' @param OutExt character, output file extension
-#' @return data.frame with summary of all runs
+#' @param FileExt character, control file extension (default ".CTL")
+#' @param RunExt character, run folder extension matching the NONMEM
+#'   `nmfe<ver>.bat` output directory.  Default ".R76" for NONMEM 7.6.
+#'   Use ".R75" or ".R74" for older versions.
+#' @param OutExt character, output file extension (default ".OUT")
+#' @return data.frame with one row per run; columns include OutName,
+#'   Parent, EstMethod, Formula, Minimize, Reason, OFV, SE, Parameter,
+#'   Theta, FixedTheta, Eta, Eps, OffDiagOmega, nDV, AICc, plus tree
+#'   layout columns (NextSib, FirstKid, LastKid, LOrder, Depth, Pos).
+#'   Returns invisible NULL with a warning if no run folders are found.
 #' @export
-SumOut <- function(FileExt = ".CTL", RunExt = ".R75", OutExt = ".OUT") {
+SumOut <- function(FileExt = ".CTL", RunExt = ".R76", OutExt = ".OUT") {
   WorkDir <- getwd()
   on.exit(setwd(WorkDir))
 
   Folders <- list.dirs(path = WorkDir, full.names = FALSE, recursive = FALSE)
-  RunFolders <- MatchEnd(Folders, RunExt)
+  # FIX (v0.3.2): MatchEnd() returns a LOGICAL mask; use it to subset Folders
+  RunFolders <- Folders[MatchEnd(Folders, RunExt)]
   nRun <- length(RunFolders)
+  if (nRun == 0) {
+    warning(sprintf("SumOut: no folders ending in '%s' under %s", RunExt, WorkDir))
+    return(invisible(NULL))
+  }
   ModelNames <- GetModelNames(RunFolders)
 
   MDL <- data.frame(OutName = character(), Parent = character(), EstMethod = character(),

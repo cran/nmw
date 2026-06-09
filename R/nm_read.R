@@ -81,8 +81,12 @@ GetProbVal <- function(Tag) {
     FCON <- readLines("FCON")
     PROB <- strsplit(trimws(substr(FCON[grep("PROB", FCON)], 9, 80)), " ")[[1]]
     Loc <- grep(Tag, PROB)
-    if (Loc > 0) {
-      return(substr(PROB[Loc], 3, nchar(PROB[Loc])))
+    # FIX (v0.3.2): grep returns integer(0) when Tag is absent (e.g. CTL has no
+    # P:/F: tag, or NM-TRAN truncated $PROB at 80 chars in FCON dropping the tag).
+    # Length-zero comparison `if (Loc > 0)` previously raised
+    # "argument is of length zero".
+    if (length(Loc) > 0 && Loc[1] > 0) {
+      return(substr(PROB[Loc[1]], 3, nchar(PROB[Loc[1]])))
     } else {
       return("")
     }

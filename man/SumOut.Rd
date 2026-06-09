@@ -4,7 +4,7 @@
 \alias{SumOut}
 \title{Summarize Multiple NONMEM Runs}
 \usage{
-SumOut(FileExt = ".CTL", RunExt = ".R75", OutExt = ".OUT")
+SumOut(FileExt = ".CTL", RunExt = ".R76", OutExt = ".OUT")
 }
 \arguments{
 \item{FileExt}{character, control file extension}

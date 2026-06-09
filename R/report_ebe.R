@@ -172,20 +172,40 @@ nmw_report_ebe <- function(run_dir = getwd()) {
   nCat <- length(Cat1)
 
   # Categorical covariates boxplots
+  # Split categorical variables across multiple pages when the nEta x nCat
+  # grid becomes too dense for boxplot margins (mar=c(4,4,2,2)).  Cap cells
+  # per page; otherwise plot.new() raises "figure margins too large".
   if (nCat > 0) {
-    par(defpar)
-    par(oma = c(1, 1, 3, 1), mar = c(4, 4, 2, 2), mfrow = c(nEta, nCat), lty = 1)
-    for (i in 1:nEta) {
-      for (j in 1:nCat) {
-        form <- paste0("ETA", i, "~", Cat1[j])
-        boxplot(formula = formula(form), data = tabEta, xlab = Cat1[j], ylab = paste("ETA", i))
-        Anova.pvalue <- anova(lm(formula(form), data = tabEta))[[5]][1]
-        if (is.finite(Anova.pvalue) & Anova.pvalue < 0.05) { txtcol <- "red" }
-        else { txtcol <- "black" }
-        mtext(side = 3, cex = 0.6, col = txtcol, paste("ANOVA p =", format(Anova.pvalue, digits = 4)))
+    MAX_CELLS_PER_PAGE <- 35
+    max_cats_per_page  <- max(1, floor(MAX_CELLS_PER_PAGE / nEta))
+    nPages_cat <- ceiling(nCat / max_cats_per_page)
+    chunks <- split(seq_len(nCat),
+                    ceiling(seq_len(nCat) / max_cats_per_page))
+
+    for (pg in seq_along(chunks)) {
+      chunk     <- chunks[[pg]]
+      nCatChunk <- length(chunk)
+      par(defpar)
+      par(oma = c(1, 1, 3, 1), mar = c(4, 4, 2, 2),
+          mfrow = c(nEta, nCatChunk), lty = 1)
+      for (i in 1:nEta) {
+        for (j_idx in seq_along(chunk)) {
+          j <- chunk[j_idx]
+          form <- paste0("ETA", i, "~", Cat1[j])
+          boxplot(formula = formula(form), data = tabEta,
+                  xlab = Cat1[j], ylab = paste("ETA", i))
+          Anova.pvalue <- anova(lm(formula(form), data = tabEta))[[5]][1]
+          if (is.finite(Anova.pvalue) & Anova.pvalue < 0.05) { txtcol <- "red" }
+          else { txtcol <- "black" }
+          mtext(side = 3, cex = 0.6, col = txtcol,
+                paste("ANOVA p =", format(Anova.pvalue, digits = 4)))
+        }
       }
+      title_str <- "ETA vs Categorical Variables"
+      if (nPages_cat > 1)
+        title_str <- paste0(title_str, " (page ", pg, "/", nPages_cat, ")")
+      mtext(outer = TRUE, side = 3, title_str)
     }
-    mtext(outer = TRUE, side = 3, "ETA vs Categorical Variables")
   }
 
   # Pair plots
