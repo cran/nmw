@@ -4,10 +4,18 @@
 \alias{nmw_report_resid}
 \title{Generate Residual Diagnostics Report (S4-Residuals.PDF)}
 \usage{
-nmw_report_resid(run_dir = getwd())
+nmw_report_resid(run_dir = getwd(), file = "S4-Residuals.PDF", model = NULL)
 }
 \arguments{
 \item{run_dir}{character, path to the NONMEM run directory (default: current directory)}
+
+\item{file}{character, output PDF filename}
+
+\item{model}{character, run/model name; NULL auto-detects via GetCurModelName()}
+}
+\value{
+Invisibly, a list with the output \code{file}, number of \code{pages},
+subject and bad-run counts, and usable/omitted residual names.
 }
 \description{
 Generates a PDF report with WRES, CWRES, IWRES diagnostics including

@@ -4,10 +4,18 @@
 \alias{nmw_report_ebe}
 \title{Generate EBE Diagnostics Report (S5-EBE.PDF)}
 \usage{
-nmw_report_ebe(run_dir = getwd())
+nmw_report_ebe(run_dir = getwd(), file = "S5-EBE.PDF", model = NULL)
 }
 \arguments{
 \item{run_dir}{character, path to the NONMEM run directory (default: current directory)}
+
+\item{file}{character, output PDF filename}
+
+\item{model}{character, run/model name; NULL auto-detects via GetCurModelName()}
+}
+\value{
+Invisibly, a list with the output \code{file}, number of \code{pages},
+eta count, and subject count.
 }
 \description{
 Generates a PDF report with empirical Bayes estimate (EBE) analysis

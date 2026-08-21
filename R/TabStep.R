@@ -37,7 +37,5 @@ TabStep = function()
     }
   }
 
-#  Result = list(THETA, OM, SG, tSD)
-#  names(Result) = c("THETA", "OMEGA", "SIGMA", "sdtab")
   return(tSD)
 }

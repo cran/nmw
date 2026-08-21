@@ -9,7 +9,6 @@ CovStep = function()
   Cov = invR %*% Smat %*% invR
   SE = sqrt(diag(Cov))
   Correl = cov2cor(Cov)
-#  InvCov = solve(Cov)
   InvCov = Rmat %*% solve(Smat) %*% Rmat
   EigenVal = sort(eigen(Correl)$values) # Sorted Eigenvalues
 

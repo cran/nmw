@@ -26,12 +26,12 @@ CombDmExPc = function(dm, ex, pc)
   ex = ex[order(ex$ID, ex$DT), ]
   pc = pc[order(pc$ID, pc$DT), ]
 
-  FLAG = rep(T, NROW(ex))
+  FLAG = rep(TRUE, NROW(ex))
   for (i in 1:nID) {
     cID = IDs[i]
-    cDAT = pc[pc$ID == cID, , drop=F]
+    cDAT = pc[pc$ID == cID, , drop=FALSE]
     cLast = cDAT[NROW(cDAT), "DT"]
-    FLAG[ex$ID == cID & ex$DT >= cLast] = F
+    FLAG[ex$ID == cID & ex$DT >= cLast] = FALSE
   }
   ex = ex[FLAG, ]
 

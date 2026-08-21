@@ -4,10 +4,18 @@
 \alias{nmw_report_ofv}
 \title{Generate OFV Diagnostic Report (S1-OFV.PDF)}
 \usage{
-nmw_report_ofv(run_dir = getwd())
+nmw_report_ofv(run_dir = getwd(), file = "S1-OFV.PDF", model = NULL)
 }
 \arguments{
 \item{run_dir}{character, path to the NONMEM run directory (default: current directory)}
+
+\item{file}{character, output PDF filename}
+
+\item{model}{character, run/model name; NULL auto-detects via GetCurModelName()}
+}
+\value{
+Invisibly, a list with the output \code{file}, number of \code{pages},
+subject and observation counts, and the objective function value.
 }
 \description{
 Generates a PDF report with objective function value diagnostics including

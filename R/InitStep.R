@@ -34,6 +34,8 @@ InitStep = function(DataAll, THETAinit, OMinit, SGinit, LB, UB, Pred, METHOD)
   colnames(e$EBE) = c("ID", e$EtaNames)
 
   IE = THETAinit
+  if (missing(LB)) LB = rep(0, e$nTheta)     # documented defaults, needed by e$alpha below
+  if (missing(UB)) UB = rep(1e6, e$nTheta)
   e$alpha  = 0.1 - log((IE - LB)/(UB - LB)/(1 - (IE - LB)/(UB - LB)))
   e$OMscl  = ScaleVar(OMinit, e$nEta)
   e$SGscl  = ScaleVar(SGinit, e$nEps)
@@ -46,16 +48,8 @@ InitStep = function(DataAll, THETAinit, OMinit, SGinit, LB, UB, Pred, METHOD)
   }
 
   e$THETAinit = THETAinit
-  if (missing(LB)) {
-    e$LB   = rep(0, e$nTheta)
-  } else {
-    e$LB   = LB
-  }
-  if (missing(UB)) {
-    e$UB   = rep(1e6, e$nTheta)
-  } else {
-    e$UB   = UB
-  }
+  e$LB = LB
+  e$UB = UB
 
   e$OMinit = OMinit
   e$SGinit = SGinit

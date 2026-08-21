@@ -4,10 +4,18 @@
 \alias{nmw_report_input}
 \title{Generate Input Data Summary Report (SA-Input.PDF)}
 \usage{
-nmw_report_input(run_dir = getwd())
+nmw_report_input(run_dir = getwd(), file = "SA-Input.PDF", model = NULL)
 }
 \arguments{
 \item{run_dir}{character, path to the NONMEM run directory (default: current directory)}
+
+\item{file}{character, output PDF filename}
+
+\item{model}{character, run/model name; NULL auto-detects via GetCurModelName()}
+}
+\value{
+Invisibly, a list with the output \code{file}, number of \code{pages},
+record/duplicate counts, and counts of subjects without dose or DV records.
 }
 \description{
 Generates a PDF report with input data validation including

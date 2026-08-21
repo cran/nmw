@@ -4,10 +4,19 @@
 \alias{nmw_report_output}
 \title{Generate NONMEM Output Report (SB-Output.PDF)}
 \usage{
-nmw_report_output(run_dir = getwd())
+nmw_report_output(run_dir = getwd(), file = "SB-Output.PDF", model = NULL)
 }
 \arguments{
 \item{run_dir}{character, path to the NONMEM run directory (default: current directory)}
+
+\item{file}{character, output PDF filename}
+
+\item{model}{accepted for a uniform report-function interface; unused because
+this report always reads \file{PRINT.OUT}}
+}
+\value{
+Invisibly, a list with the output \code{file}, number of \code{pages},
+and number of source \code{lines}.
 }
 \description{
 Includes the NONMEM PRINT.OUT file content in a PDF report.

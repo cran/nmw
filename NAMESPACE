@@ -1,4 +1,12 @@
+# Exports from nmw_0.4.0 (control-stream to nmw code generator)
+export(ctl2nmw)
+S3method(print, nmwCode)
+
 # Exports from nmw_0.1.6 (estimation methods)
+# 'e' was exported up to 0.1.6 via exportPattern() and is required by
+# user-written PRED functions (e$METHOD) and the documented workflow
+# (get("EBE", envir=e)); re-exported since 0.4.0.
+export(e)
 export(AddCox)
 export(CalcSmat)
 export(CombDmExPc)
@@ -41,10 +49,8 @@ export(parse_dtc)
 
 # Exports from nma_0.1.0 (post-run processing)
 export(AddDoNoTaLD)
-export(AddPage)
 export(BtwTagMat)
 export(BtwTagVals)
-export(ClosePDF)
 export(DxPlotPost)
 export(EBEpair)
 export(ExpandDoseHist)
@@ -62,9 +68,6 @@ export(NMIDStat)
 export(NMVarStat)
 export(Outline)
 export(ParseOut)
-export(PrepPDF)
-export(PrinMTxt)
-export(PrinTxt)
 export(RemoveNA)
 export(ResTest)
 export(SESuccess)
@@ -82,10 +85,11 @@ export(nmw_run)
 export(run.test.nm)
 
 # Imports
+import(simPDF)
 importFrom(numDeriv, grad, hessian)
 importFrom(MASS, ginv)
 importFrom(grDevices, pdf, dev.off)
-importFrom(graphics, plot, lines, text, par, hist, boxplot, pairs, mtext,
+importFrom(graphics, plot, plot.new, lines, text, par, hist, boxplot, pairs, mtext,
            abline, points, rect, screen, split.screen, close.screen, layout,
            strwidth)
 importFrom(stats, density, shapiro.test, t.test, anova, lm, formula, cor,

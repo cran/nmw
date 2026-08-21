@@ -4,160 +4,101 @@
 #' standard errors, confidence intervals, and significance flags.
 #'
 #' @param run_dir character, path to the NONMEM run directory (default: current directory)
+#' @param file character, output PDF filename
+#' @param model character, run/model name; NULL auto-detects via GetCurModelName()
+#' @return Invisibly, a list with the output \code{file}, number of \code{pages},
+#'   and counts of theta, eta, and epsilon parameters.
 #' @export
-nmw_report_param <- function(run_dir = getwd()) {
-  owd <- setwd(run_dir)
-  on.exit(setwd(owd))
+nmw_report_param <- function(run_dir = getwd(), file = "S2-Parameters.PDF", model = NULL) {
+  owd <- setwd(run_dir); on.exit(setwd(owd))
 
-  defpar <- par(no.readonly = TRUE)
-  defpar$new <- NULL
-  on.exit(par(defpar), add = TRUE)
-
-  CtlName <- GetCurModelName()
-
+  ## ---- parsing + statistics: reused verbatim from nmw ----------------------
+  ## (GetCurModelName, ReadLastTable, CountEXTParams, BtwTagVals, BtwTagMat are
+  ##  nmw functions; in the real package these are simply the package's own.)
+  CtlName <- if (is.null(model)) GetCurModelName() else model
   XML <- readLines(paste0(CtlName, ".xml"))
-  EXT <- read.table(paste0(CtlName, ".ext"), skip = 1, header = TRUE)
+  EXT <- ReadLastTable(paste0(CtlName, ".ext"))
   EXT <- EXT[EXT[, "ITERATION"] >= 0, ]
-
   params <- CountEXTParams(EXT)
-  nThetaAll <- params$nTheta
-  nEtaAll <- params$nEta
-  nEpsAll <- params$nEps
+  nThetaAll <- params$nTheta; nEtaAll <- params$nEta; nEpsAll <- params$nEps
 
-  THETA <- as.double(BtwTagVals("nm:theta", XML))
+  THETA   <- as.double(BtwTagVals("nm:theta",   XML))
   THETASE <- as.double(BtwTagVals("nm:thetase", XML))
-  OMEGA <- BtwTagMat("omega", XML, nEtaAll)
+  OMEGA   <- BtwTagMat("omega",   XML, nEtaAll)
   OMEGAse <- BtwTagMat("omegase", XML, nEtaAll)
-  SIGMA <- BtwTagMat("sigma", XML, nEpsAll)
+  SIGMA   <- BtwTagMat("sigma",   XML, nEpsAll)
   SIGMAse <- BtwTagMat("sigmase", XML, nEpsAll)
 
-  Thetas <- cbind(THETA, THETASE)
-  OMa <- rbind(OMEGA, OMEGAse)
-  SGa <- rbind(SIGMA, SIGMAse)
-
-  nThAll <- length(Thetas[, 1])
-  Fixed <- vector()
-  Unfixed <- vector()
-
-  for (i in 1:nThAll) {
-    if (Thetas[i, 2] == 1e+10) {
-      Fixed <- c(Fixed, i)
-    } else {
-      Unfixed <- c(Unfixed, i)
-    }
-  }
-  nFixedTh <- length(Fixed)
-  nUnfixedTh <- length(Unfixed)
-  ThRowName <- character()
-  for (i in 1:nThAll) {
-    ThRowName <- c(ThRowName, paste("Theta", i))
-  }
-  rownames(Thetas) <- ThRowName
-  colnames(Thetas) <- c("Point Estitmate", "Standard Error")
-  LL <- Thetas[, 1] - 2 * Thetas[, 2]
-  UL <- Thetas[, 1] + 2 * Thetas[, 2]
+  Thetas <- cbind(THETA, THETASE); OMa <- rbind(OMEGA, OMEGAse); SGa <- rbind(SIGMA, SIGMAse)
+  nThAll <- length(Thetas[, 1]); Fixed <- vector(); Unfixed <- vector()
+  for (i in 1:nThAll) if (Thetas[i, 2] == 1e+10) Fixed <- c(Fixed, i) else Unfixed <- c(Unfixed, i)
+  nFixedTh <- length(Fixed); nUnfixedTh <- length(Unfixed)
+  ThRowName <- character(); for (i in 1:nThAll) ThRowName <- c(ThRowName, paste("Theta", i))
+  rownames(Thetas) <- ThRowName; colnames(Thetas) <- c("Point Estimate", "Standard Error")
+  LL <- Thetas[, 1] - 2 * Thetas[, 2]; UL <- Thetas[, 1] + 2 * Thetas[, 2]
   ZERO <- Thetas[, 2] / abs(Thetas[, 1]) > 0.5
   ONE <- (Thetas[, 1] - 2 * Thetas[, 2] - 1) * (Thetas[, 1] + 2 * Thetas[, 2] - 1) < 0 |
     (Thetas[, 1] - 2 * Thetas[, 2] + 1) * (Thetas[, 1] + 2 * Thetas[, 2] + 1) < 0
-
-  Thetas <- cbind(Thetas, LL, UL, ZERO, ONE)
-  UnfixedThetas <- Thetas[Unfixed, ]
-
-  nEta <- length(OMa[1, ])
-  OM <- OMa[1:nEta, , drop = FALSE]
-  SeOM <- OMa[(nEta + 1):(2 * nEta), , drop = FALSE]
-  EtaNames <- character()
-
-  for (i in 1:nEta) {
-    EtaNames <- c(EtaNames, paste("Eta", i))
-  }
-  rownames(OM) <- EtaNames
-  colnames(OM) <- EtaNames
-  rownames(SeOM) <- EtaNames
-  colnames(SeOM) <- EtaNames
-
+  Thetas <- cbind(Thetas, LL, UL, ZERO, ONE); UnfixedThetas <- Thetas[Unfixed, , drop = FALSE]
+  nEta <- length(OMa[1, ]); OM <- OMa[1:nEta, , drop = FALSE]; SeOM <- OMa[(nEta + 1):(2 * nEta), , drop = FALSE]
+  EtaNames <- character(); for (i in 1:nEta) EtaNames <- c(EtaNames, paste("Eta", i))
+  rownames(OM) <- colnames(OM) <- rownames(SeOM) <- colnames(SeOM) <- EtaNames
   RSEOM <- SeOM / abs(OM) * 100
+  for (i in 1:nEta) for (j in i:nEta) if (j > i) OM[i, j] <- OM[i, j] / sqrt(OM[i, i] * OM[j, j])
+  nEps <- length(SGa[1, ]); SG <- SGa[1:nEps, ]; SeSG <- SGa[(nEps + 1):(2 * nEps), ]
 
-  for (i in 1:nEta) {
-    for (j in i:nEta) {
-      if (j > i) OM[i, j] <- OM[i, j] / sqrt(OM[i, i] * OM[j, j])
-    }
-  }
+  ## ---- PDF via simPDF (replaces 72 lines of dead-reckoned PrinTxt/AddPage) --
+  EtaCV <- matrix(round(sqrt(exp(diag(OM)) - 1) * 100, 4), nrow = 1,
+                  dimnames = list("CV(%)", EtaNames))
 
-  nEps <- length(SGa[1, ])
-  SG <- SGa[1:nEps, ]
-  SeSG <- SGa[(nEps + 1):(2 * nEps), ]
+  blocks <- list(
+    simPDF::block_para("Summary 2 - Parameters", size = 16, font = 2),
+    simPDF::block_rule(),
+    simPDF::block_keep(list(
+      simPDF::block_para("Thetas", size = 13, font = 2),
+      simPDF::block_para(sprintf("Number of All / Fixed / Unfixed Thetas : %d / %d / %d",
+                                 nThAll, nFixedTh, nUnfixedTh), size = 10))),
+    if (nFixedTh > 0) simPDF::block_keep(list(
+      simPDF::block_para("Fixed Theta Values", size = 11, font = 2),
+      simPDF::block_pre(sprintf("Theta %d : %s", Fixed, format(Thetas[Fixed, 1])), size = 9))),
+    simPDF::block_para("Estimated Thetas", size = 11, font = 2),
+    simPDF::block_table(round(UnfixedThetas, 5), size = 9, family = "mono"),
+    simPDF::block_para("*LL: Lower Limit   UL: Upper Limit   (Point Estimate +/- 2*SE)", size = 8),
+    simPDF::block_para(" ZERO: maybe zero? 0=No 1=Yes    ONE: maybe one? 0=No 1=Yes", size = 8),
+    simPDF::block_spacer(6),
+    simPDF::block_keep(list(
+      simPDF::block_para("Omegas", size = 13, font = 2),
+      simPDF::block_para(sprintf("Number of Etas : %d", nEta), size = 10))),
+    simPDF::block_para("Omega Matrix (lower = covariance, upper = correlation, diag = variance)",
+                       size = 11, font = 2),
+    simPDF::block_matrix(round(OM, 5), size = 9),
+    simPDF::block_spacer(4),
+    simPDF::block_para("Interindividual Variability CV(%) for exp(eta) model", size = 11, font = 2),
+    simPDF::block_matrix(EtaCV, size = 9),
+    simPDF::block_spacer(6),
+    simPDF::block_para("Standard Error of Omega Matrix", size = 11, font = 2),
+    simPDF::block_matrix(round(SeOM, 5), size = 9),
+    simPDF::block_spacer(4),
+    simPDF::block_para("Relative Standard Error(%) of Omega Matrix", size = 11, font = 2),
+    simPDF::block_matrix(round(RSEOM, 4), size = 9),
+    simPDF::block_spacer(6),
+    simPDF::block_keep(list(
+      simPDF::block_para("Sigmas", size = 13, font = 2),
+      simPDF::block_para(sprintf("Number of Epsilons : %d", nEps), size = 10))))
 
-  # --- PDF Generation ---
-  PrepPDF("S2-Parameters.PDF")
-
-  AddPage()
-  PrinTxt(1, 1, "Summary 2 - Parameters", Cex = 1.2)
-  PrinTxt(3, 1, "Thetas", Cex = 1.0)
-  PrinTxt(5, 3, paste("Number of All Thetas     :", nThAll))
-  PrinTxt(6, 3, paste("Number of Fixed Thetas   :", nFixedTh))
-  PrinTxt(7, 3, paste("Number of Unfixed Thetas :", nUnfixedTh))
-
-  if (nFixedTh > 0) {
-    PrinTxt(9, 2, "Fixed Theta Values", Cex = 0.9)
-    for (i in 1:nFixedTh) {
-      PrinTxt(9 + i, 5, paste("Theta", Fixed[i], ":", Thetas[Fixed[i], 1]))
-    }
-  }
-
-  PrinTxt(9 + nFixedTh + 2, 2, "Estimated Thetas", Cex = 0.9)
-  sUnfixed <- capture.output(UnfixedThetas)
-  for (i in 1:length(sUnfixed)) {
-    PrinTxt(9 + nFixedTh + 2 + i, 5, sUnfixed[i])
-  }
-
-  PrinTxt(nThAll + 13.5, 6, "*LL  : Lower Limit", Cex = 0.7)
-  PrinTxt(nThAll + 14, 6, " UL  : Upper Limit", Cex = 0.7)
-  PrinTxt(nThAll + 14.5, 6, " ZERO: Is this maybe zero? 0:No, 1:Yes", Cex = 0.7)
-  PrinTxt(nThAll + 15, 6, " ONE : Is this maybe one?  0:No, 1:Yes", Cex = 0.7)
-
-  AddPage()
-  PrinTxt(3, 1, "Omegas", Cex = 1.0)
-  PrinTxt(5, 3, paste("Number of Etas           :", nEta))
-
-  PrinTxt(7, 2, "Omega Matrix", Cex = 0.9)
-  sOM <- capture.output(OM)
-  for (i in 1:length(sOM)) {
-    PrinTxt(8 + i, 5, sOM[i])
-  }
-  PrinTxt(nEta + 10.5, 6, "*Lower triangle is covariance matrix.", Cex = 0.7)
-  PrinTxt(nEta + 11, 6, " Upper triangle is correlation matrix.", Cex = 0.7)
-  PrinTxt(nEta + 11.5, 6, " Diagonal elements are variances.", Cex = 0.7)
-
-  PrinTxt(nEta + 13, 3, "Interindividual Variability (CV) in case of exp(eta) model (x100)")
-  for (i in 1:nEta) {
-    PrinTxt(nEta + 14, i * 8, paste("Eta", i))
-    PrinTxt(nEta + 15, i * 8, format(sqrt(exp(OM[i, i]) - 1) * 100, digits = 4))
-  }
-
-  PrinTxt(nEta + 18, 2, "Standard Error of Omega Matrix", Cex = 0.9)
-  sSeOM <- capture.output(SeOM)
-  for (i in 1:length(sSeOM)) {
-    PrinTxt(nEta + 19 + i, 5, sSeOM[i])
-  }
-
-  PrinTxt(2 * nEta + 23, 2, "Relative Standard Error(%) of Omega Matrix", Cex = 0.9)
-  sRSEOM <- capture.output(RSEOM)
-  for (i in 1:length(sRSEOM)) {
-    PrinTxt(2 * nEta + 24 + i, 5, sRSEOM[i])
-  }
-
-  PrinTxt(3 * nEta + 27, 1, "Sigmas", Cex = 1)
-  PrinTxt(3 * nEta + 29, 3, paste("Number of Epsilons       :", nEps))
-  if (nEps == 1 && SG == 1 & SeSG == 1e+10) {
-    PrinTxt(3 * nEta + 31, 3, "Fixed as 1")
+  if (nEps == 1 && all(SG == 1) && all(SeSG == 1e+10)) {
+    blocks <- c(blocks, list(simPDF::block_para("Fixed as 1", size = 10)))
   } else {
-    sSG <- capture.output(SG)
-    for (i in 1:length(sSG)) {
-      PrinTxt(3 * nEta + 30 + i, 5, sSG[i])
-    }
+    SGm <- if (is.matrix(SG)) SG else matrix(SG, nrow = 1, dimnames = list("Eps", NULL))
+    blocks <- c(blocks, list(simPDF::block_matrix(round(SGm, 5), size = 9)))
   }
 
-  ClosePDF()
-  message("S2-Parameters.PDF generated.")
+  doc <- simPDF::sp_new(file, paper = "letter", family = "Courier", size = 10)
+  simPDF::frame_set(doc, top = doc$H - 45, bottom = 45, left = 45, right = doc$W - 45)
+  simPDF::flow_run(doc, Filter(Negate(is.null), blocks),
+                   footer = simPDF::block_para("CONFIDENTIAL", size = 8, align = "center"))
+  np <- doc$page_no
+  simPDF::sp_close(doc)
+  invisible(list(file = file, pages = np,
+                 nTheta = nThAll, nEta = nEta, nEps = nEps))
 }

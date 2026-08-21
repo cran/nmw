@@ -38,7 +38,7 @@ AddDoNoTaLD <- function(NMData, ID = "ID", TIME = "TIME", AMT = "AMT",
   TaLD <- vector(length = nRec)
 
   LastID <- -1
-  for (i in 1:nRec) {
+  for (i in seq_len(nRec)) {
     CurID <- NMData[i, ID]
     if (LastID != CurID) {
       pToLD <- 0
@@ -49,7 +49,7 @@ AddDoNoTaLD <- function(NMData, ID = "ID", TIME = "TIME", AMT = "AMT",
       DosingHist <- NMData[NMData[, ID] == CurID & NMData[, AMT] > 0 & NMData[, MDV] == 1,
                            c(TIME, AMT, II, ADDL)]
       nDoseRec <- length(DosingHist[, AMT])
-      for (j in 1:nDoseRec) {
+      for (j in seq_len(nDoseRec)) {
         cADDL <- DosingHist[j, ADDL]
         if (cADDL > 0) {
           cAMT <- DosingHist[j, AMT]
@@ -97,7 +97,7 @@ ExpandDoseHist <- function(DoseHistTab) {
   TempRec <- matrix(nrow = 1, ncol = dim(RetTab)[2])
   colnames(TempRec) <- colnames(RetTab)
 
-  for (j in 1:nDoseRec) {
+  for (j in seq_len(nDoseRec)) {
     cADDL <- RetTab[j, "ADDL"]
     if (cADDL > 0) {
       cTIME <- RetTab[j, "TIME"]
@@ -123,7 +123,7 @@ ExpandDoseHist <- function(DoseHistTab) {
   nRetRec <- dim(RetTab)[1]
   pTIME <- -1 * max(IIs, na.rm = TRUE)
   pAMT <- 0
-  for (j in 1:nRetRec) {
+  for (j in seq_len(nRetRec)) {
     cTIME <- RetTab[j, "TIME"]
     cAMT <- RetTab[j, "AMT"]
     if ((cTIME - pTIME) < 0.5 * mII & cAMT > 0 & pAMT > 0) {
@@ -146,7 +146,7 @@ ExpandDoseHist <- function(DoseHistTab) {
 RemoveNA <- function(RawData) {
   nRow <- nrow(RawData)
   Index <- vector(length = nRow)
-  for (i in 1:nRow) {
+  for (i in seq_len(nRow)) {
     Index[i] <- !any(is.na(RawData[i, ]))
   }
   return(RawData[Index, ])
@@ -173,7 +173,7 @@ RmvCol <- function(Tab, OldCols) {
 #' @keywords internal
 RenCol <- function(ColList, OldCol, NewCol) {
   nCol <- length(ColList)
-  for (i in 1:nCol) if (ColList[i] == OldCol) ColList[i] <- NewCol
+  for (i in seq_len(nCol)) if (ColList[i] == OldCol) ColList[i] <- NewCol
   return(ColList)
 }
 
@@ -188,8 +188,8 @@ RenCol <- function(ColList, OldCol, NewCol) {
 RmvFixed <- function(Table) {
   ColNames <- colnames(Table)
   NotFixed <- rep(FALSE, length(ColNames))
-  for (i in 1:dim(Table)[1]) {
-    for (j in 1:length(ColNames)) {
+  for (i in seq_len(dim(Table)[1])) {
+    for (j in seq_along(ColNames)) {
       if (Table[i, ColNames[j]] != Table[1, ColNames[j]]) NotFixed[j] <- TRUE
     }
   }
@@ -206,7 +206,7 @@ RmvZero <- function(SymmMat) {
   nRow <- dim(SymmMat)[1]
   NonZero <- rep(FALSE, nRow)
 
-  for (i in 1:nRow) {
+  for (i in seq_len(nRow)) {
     for (j in 1:i) {
       if (SymmMat[i, j] != 0) NonZero[i] <- TRUE
     }

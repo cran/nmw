@@ -1,6 +1,6 @@
 Package: nmw
-Version: 0.3.1
-Date: 2026-06-09
+Version: 0.5.1
+Date: 2026-08-21
 Title: Understanding Nonlinear Mixed Effects Modeling for Population
         Pharmacokinetics
 Description: This shows how 'NONMEM' (Beal SL, Sheiner LB, Boeckmann AJ,
@@ -15,8 +15,8 @@ Description: This shows how 'NONMEM' (Beal SL, Sheiner LB, Boeckmann AJ,
     pharmacokinetic parameter distributions.  Helper utilities for
     building NONMEM-ready datasets from SDTM-style source tables are
     also included.
-Depends: R (>= 3.5.0), numDeriv
-Imports: MASS, grDevices, graphics, stats, utils
+Depends: R (>= 3.6.0), numDeriv
+Imports: simPDF (>= 0.1.1), MASS, grDevices, graphics, stats, utils
 ByteCompile: yes
 License: GPL-3
 Copyright: 2017-, Kyun-Seop Bae
@@ -32,7 +32,7 @@ Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 NeedsCompilation: no
-RoxygenNote: 7.3.3
-Packaged: 2026-06-09 03:10:20 UTC; Kyun-SeopBae
+Config/roxygen2/version: 8.0.0
+Packaged: 2026-08-20 20:13:05 UTC; CodexSandboxOffline
 Repository: CRAN
-Date/Publication: 2026-06-09 07:00:08 UTC
+Date/Publication: 2026-08-21 05:41:31 UTC

@@ -16,8 +16,9 @@ TrimOut removes unnecessary parts from NONMEM original OUTPUT file.
 NONMEM original OUTPUT file contains unnecessary parts such as CONTROL file content, Start/End Time, License Info, Print control characters such as "+", "0", "1". This function trims those.
 }
 \value{
-  outFile will be written in the current working folder or designated folder.
-  This returns TRUE if the process was smooth.
+  If \code{outFile} is \code{""}, the trimmed lines are returned as a character
+  vector.  Otherwise the trimmed output is written to \code{outFile} in the
+  current working (or designated) folder and \code{NULL} is returned invisibly.
 }
 \author{Kyun-Seop Bae <k@acr.kr>}
 \keyword{NONMEM OUTPUT}

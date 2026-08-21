@@ -32,7 +32,7 @@ PanelCor <- function(x, y, digits = 2, prefix = "", cex.cor) {
   r <- cor(x, y)
   txt <- format(c(r, 0.123456789), digits = digits)[1]
   txt <- paste(prefix, txt, sep = "")
-  if (missing(cex.cor)) cex <- 0.8 / strwidth(txt)
+  cex <- if (missing(cex.cor)) 0.8 / strwidth(txt) else cex.cor
   text(0.5, 0.5, txt, cex = min(1, cex * abs(r) + 0.5))
 }
 

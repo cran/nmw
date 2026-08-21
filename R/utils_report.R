@@ -59,7 +59,7 @@ CalcTaLDForReport <- function(FDATA, nRec) {
   DOCC <- -1
   DosingHist2 <- NULL
 
-  for (i in 1:nRec) {
+  for (i in seq_len(nRec)) {
     CurID <- FDATA[i, "ID"]
     if (LastID != CurID) {
       pToLD <- 0
@@ -68,7 +68,7 @@ CalcTaLDForReport <- function(FDATA, nRec) {
         DosingHist <- FDATA[FDATA[, "ID"] == CurID & FDATA[, "AMT"] > 0 & FDATA[, "MDV"] == 1,
                             c("AMT", "TIME", "II", "ADDL")]
         nDoseRec <- length(DosingHist[, "AMT"])
-        for (j in 1:nDoseRec) {
+        for (j in seq_len(nDoseRec)) {
           cADDL <- DosingHist[j, "ADDL"]
           if (cADDL > 0) {
             cAMT <- DosingHist[j, "AMT"]
@@ -182,6 +182,26 @@ OFV_SCREEN_LAYOUT <- matrix(
 )
 
 
+#' Read the Last Table Block of a NONMEM Output Table File
+#'
+#' Reads a NONMEM table-style file (.ext, .grd, .phi) and returns ONLY the LAST
+#' "TABLE NO." block. With chained estimation (multiple \code{$EST} records) these
+#' files contain one table per estimation step; the last block is the final
+#' (e.g. FOCE-INTER) result. Backward-compatible with single-table files.
+#'
+#' @param FileName character, path to the NONMEM table file
+#' @return data.frame of the last table block
+#' @keywords internal
+ReadLastTable <- function(FileName) {
+  Lines <- readLines(FileName)
+  TabIdx <- grep("^[[:space:]]*TABLE NO", Lines)
+  if (length(TabIdx) == 0) return(read.table(FileName, skip = 1, header = TRUE))
+  Start <- TabIdx[length(TabIdx)]                          # last TABLE NO. = last $EST
+  Block <- Lines[(Start + 1):length(Lines)]
+  Block <- Block[!grepl("^[[:space:]]*TABLE NO", Block)]   # drop any stray TABLE lines
+  read.table(textConnection(Block), header = TRUE)
+}
+
 #' Read EXT File from Current Directory
 #'
 #' @return data.frame or NULL if file not found
@@ -189,5 +209,37 @@ OFV_SCREEN_LAYOUT <- matrix(
 ReadEXTFile <- function() {
   EXTName <- paste0(GetCurModelName(), ".ext")
   if (!file.exists(EXTName)) return(NULL)
-  read.table(EXTName, skip = 1, header = TRUE)
+  ReadLastTable(EXTName)              # chained-$EST safe (last table)
+}
+
+
+#' Classify NONMEM Data Columns into Covariate Roles
+#'
+#' Shared classification used by the covariate sections of report_ebe.R.
+#' Splits the columns summarised in \code{VarStat} into structural/reserved
+#' words, columns to drop (reserved plus single-valued), categorical
+#' covariates (small-cardinality integers), and continuous covariates.
+#'
+#' @param VarStat matrix from \code{\link{NMVarStat}}
+#' @return list with ResWords, RmvList, CatList, ContList
+#' @keywords internal
+ClassifyCovariates <- function(VarStat) {
+  ResWords <- c("ID", "DV", "MDV", "EVID", "AMT", "RATE", "CMT", "II", "ADDL", "SS", "TIME", "DATE", "LNDV")
+  RmvList <- union(ResWords, rownames(VarStat[VarStat[, "nUniq"] == 1, ]))
+  CatList <- setdiff(rownames(VarStat[VarStat[, "ALLInt"] == 1 & VarStat[, "nUniq"] < 8 & VarStat[, "nUniq"] > 1, ]), RmvList)
+  ContList <- setdiff(setdiff(rownames(VarStat), RmvList), c(CatList, "SITE", "CENT"))
+  list(ResWords = ResWords, RmvList = RmvList, CatList = CatList, ContList = ContList)
+}
+
+
+#' Number of Data Records from NONMEM XML/Report Lines
+#'
+#' Extracts the "NO. OF DATA RECS IN DATA SET" count. Shared between
+#' report_resid.R and report_input.R.
+#'
+#' @param XML character vector of NONMEM output lines
+#' @return integer record count
+#' @keywords internal
+GetNRecFromXML <- function(XML) {
+  as.integer(ParseOut(" NO. OF DATA RECS IN DATA SET:", XML))
 }

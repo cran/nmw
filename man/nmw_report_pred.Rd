@@ -4,10 +4,18 @@
 \alias{nmw_report_pred}
 \title{Generate Prediction Diagnostics Report (S3-Predictions.PDF)}
 \usage{
-nmw_report_pred(run_dir = getwd())
+nmw_report_pred(run_dir = getwd(), file = "S3-Predictions.PDF", model = NULL)
 }
 \arguments{
 \item{run_dir}{character, path to the NONMEM run directory (default: current directory)}
+
+\item{file}{character, output PDF filename}
+
+\item{model}{character, run/model name; NULL auto-detects via GetCurModelName()}
+}
+\value{
+Invisibly, a list with the output \code{file}, number of \code{pages},
+compartment count, and subject count.
 }
 \description{
 Generates a PDF report with spaghetti plots, DV vs PRED/IPRE,

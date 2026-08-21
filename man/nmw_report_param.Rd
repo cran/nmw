@@ -4,10 +4,18 @@
 \alias{nmw_report_param}
 \title{Generate Parameter Estimates Report (S2-Parameters.PDF)}
 \usage{
-nmw_report_param(run_dir = getwd())
+nmw_report_param(run_dir = getwd(), file = "S2-Parameters.PDF", model = NULL)
 }
 \arguments{
 \item{run_dir}{character, path to the NONMEM run directory (default: current directory)}
+
+\item{file}{character, output PDF filename}
+
+\item{model}{character, run/model name; NULL auto-detects via GetCurModelName()}
+}
+\value{
+Invisibly, a list with the output \code{file}, number of \code{pages},
+and counts of theta, eta, and epsilon parameters.
 }
 \description{
 Generates a PDF report with theta, omega, and sigma parameter estimates,

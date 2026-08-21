@@ -25,7 +25,7 @@ GetCurModelName <- function() {
 GetOFV <- function() {
   EXTName <- paste0(GetCurModelName(), ".ext")
   if (length(intersect(toupper(list.files()), toupper(EXTName))) == 1) {
-    EXT <- read.table(EXTName, skip = 1, header = TRUE)
+    EXT <- ReadLastTable(EXTName)              # chained-$EST safe (last table)
     if ("OBJ" %in% colnames(EXT)) {
       EXT0 <- EXT[EXT[, "ITERATION"] >= 0, ]
       nRow <- NROW(EXT0)
@@ -49,7 +49,8 @@ GetOFV <- function() {
 GetEstMethod <- function() {
   EXTName <- paste0(GetCurModelName(), ".ext")
   if (length(intersect(toupper(list.files()), toupper(EXTName))) == 1) {
-    EstString <- strsplit(readLines(EXTName, n = 1), ":")[[1]][2]
+    TabLines <- grep("TABLE NO", readLines(EXTName), value = TRUE)   # chained-safe: last $EST method
+    EstString <- strsplit(TabLines[length(TabLines)], ":")[[1]][2]
     EstMethod <- c("FO", "FOI", "FOCE", "FOCEI", "L", "LI",
                    "FO", "FOI", "FOCE", "FOCEI", "L", "LI")
     names(EstMethod) <- c(
@@ -140,7 +141,7 @@ SESuccess <- function() {
 GetCountPara <- function() {
   GRDName <- paste0(GetCurModelName(), ".grd")
   if (!file.exists(GRDName)) return(NA)
-  GRD <- read.table(GRDName, skip = 1, header = TRUE)
+  GRD <- ReadLastTable(GRDName)              # chained-$EST safe (last table)
   ncol(GRD) - 1
 }
 
@@ -181,7 +182,7 @@ GetCountFixedTheta <- function() {
 GetCountEta <- function() {
   PHIName <- paste0(GetCurModelName(), ".phi")
   if (!file.exists(PHIName)) return(NA)
-  PHI <- read.table(PHIName, skip = 1, header = TRUE)
+  PHI <- ReadLastTable(PHIName)              # chained-$EST safe (last table)
   length(grep("ETA", colnames(PHI)))
 }
 

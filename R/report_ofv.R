@@ -4,36 +4,35 @@
 #' total OFV, AICc, BIC, individual OFV per DV summary, and gradient analysis.
 #'
 #' @param run_dir character, path to the NONMEM run directory (default: current directory)
+#' @param file character, output PDF filename
+#' @param model character, run/model name; NULL auto-detects via GetCurModelName()
+#' @return Invisibly, a list with the output \code{file}, number of \code{pages},
+#'   subject and observation counts, and the objective function value.
 #' @export
-nmw_report_ofv <- function(run_dir = getwd()) {
+nmw_report_ofv <- function(run_dir = getwd(), file = "S1-OFV.PDF", model = NULL) {
   owd <- setwd(run_dir)
   on.exit(setwd(owd))
 
-  defpar <- par(no.readonly = TRUE)
-  defpar$new <- NULL
-  on.exit(par(defpar), add = TRUE)
-
-  CtlName <- GetCurModelName()
+  ## ---- parsing + statistics: reused verbatim from nmw report_ofv.R ----------
+  CtlName <- if (is.null(model)) GetCurModelName() else model
 
   XML <- readLines(paste0(CtlName, ".xml"))
-  EXT <- read.table(paste0(CtlName, ".ext"), skip = 1, header = TRUE)
-  GRD <- read.table(paste0(CtlName, ".grd"), skip = 1, header = TRUE)
-  PHI <- read.table(paste0(CtlName, ".phi"), skip = 1, header = TRUE)
+  EXT <- ReadLastTable(paste0(CtlName, ".ext"))   # chained-$EST safe (last table)
+  GRD <- ReadLastTable(paste0(CtlName, ".grd"))
+  PHI <- ReadLastTable(paste0(CtlName, ".phi"))
+
+  # Final OFV from the last $EST's final-estimate row (ITERATION==-1000000000), read BEFORE
+  # the >=0 filter and RmvFixed. Chained-$EST safe: when the last $EST converges in very few
+  # iterations the recorded iteration rows are (near-)identical, so RmvFixed drops the constant
+  # OBJ column and the old "OFV at max iteration" lookup returned empty -> blank OFV/AICc/BIC.
+  OFV <- EXT[EXT[, "ITERATION"] == -1000000000, "OBJ"]
 
   EXT <- EXT[EXT[, "ITERATION"] >= 0, ]
   EXT <- RmvFixed(EXT)
 
-  IDs <- PHI[, "ID"]
-  nID <- length(IDs)
-
-  params <- CountEXTParams(EXT)
-  nTheta <- params$nTheta
-  nEta <- params$nEta
-  nEps <- params$nEps
   nPara <- dim(GRD)[2] - 1
 
   IterCnt <- max(EXT[, "ITERATION"])
-  OFV <- EXT[EXT[, "ITERATION"] == IterCnt, "OBJ"]
   Grad <- GRD[GRD[, "ITERATION"] == IterCnt, ]
 
   TagList <- c(
@@ -68,7 +67,6 @@ nmw_report_ofv <- function(run_dir = getwd()) {
   IDStat4 <- IDStat3[, -(11:14)]
   IDStat4$OFVpDV <- IDStat4[, "iOFV"] / IDStat4[, "nDV"]
   IDStat5 <- IDStat4[order(IDStat4[, "OFVpDV"], decreasing = TRUE), ]
-  IDStat6 <- capture.output(IDStat5)
 
   AICc <- OFV + 2 * nPara + 2 * nPara * (nPara + 1) / (nDV - nPara - 1)
   SBIC <- OFV + nPara * log(nDV)
@@ -76,109 +74,139 @@ nmw_report_ofv <- function(run_dir = getwd()) {
   sIOFVpDV <- summary(IDStat5[, "OFVpDV"])
   sdIOFVpDV <- sd(IDStat5[, "OFVpDV"])
 
-  # --- PDF Generation ---
-  PrepPDF("S1-OFV.PDF")
+  ## ---- PDF via simPDF (replaces PrepPDF/split.screen/AddPage/PrinTxt) -------
 
-  split.screen(OFV_SCREEN_LAYOUT)
-  options(width = 90)
+  # Page-1 summary text (aligned key:value lists -> block_pre, monospace)
+  probLine <- paste("PROBLEM :", XML[grep(" PROBLEM NO.:", XML) + 1])
 
-  AddPage()
+  ofvLines <- c(
+    paste("Number of Total Records :", nRec),
+    paste("Number of DV Records    :", nObs),
+    paste("Number of Items(Columns):", nItem),
+    paste("Number of Parameters    :", nPara),
+    paste("Objective Function Value:", OFV),
+    paste("OFV per DV              :", format(OFV / nDV, digits = 5)),
+    paste("Corrected AIC Value     :", format(AICc, digits = 10)),
+    paste("Schwartz Criterion(BIC) :", format(SBIC, digits = 10)),
+    paste("# of Gradients Over |1| :", sum(abs(Grad[-1]) > 1)),
+    paste("Number of Sig Digits    :", nSigDigit)
+  )
 
-  screen(1)
-  PrinTxt(1, 1, "Summary 1 - Objective Function Values", Cex = 1.2)
-  PrinTxt(3, 1, paste("PROBLEM :", XML[grep(" PROBLEM NO.:", XML) + 1]), Cex = 0.9)
-  PrinTxt(5, 3, paste("Number of Total Records :", nRec))
-  PrinTxt(6, 3, paste("Number of DV Records    :", nObs))
-  PrinTxt(7, 3, paste("Number of Items(Columns):", nItem))
-  PrinTxt(8, 3, paste("Number of Parameters    :", nPara))
-  PrinTxt(9, 3, paste("Objective Function Value:", OFV))
-  PrinTxt(10, 3, paste("OFV per DV              :", format(OFV / nDV, digits = 5)))
-  PrinTxt(11, 3, paste("Corrected AIC Value     :", format(AICc, digits = 10)))
-  PrinTxt(12, 3, paste("Schwartz Criterion(BIC) :", format(SBIC, digits = 10)))
-  PrinTxt(13, 3, paste("# of Gradients Over |1| :", sum(abs(Grad[-1]) > 1)))
-  PrinTxt(14, 3, paste("Number of Sig Digits    :", nSigDigit))
+  iofvSumLines <- c(
+    paste("Minimum :", sIOFVpDV[1]),
+    paste("1st Qu. :", sIOFVpDV[2]),
+    paste("Median  :", sIOFVpDV[3]),
+    paste("Mean    :", sIOFVpDV[4]),
+    paste("3rd Qu. :", sIOFVpDV[5]),
+    paste("Maximum :", sIOFVpDV[6]),
+    paste("Std Dev :", format(sdIOFVpDV, digits = 4)),
+    paste("Coe Var :", format(sdIOFVpDV / sIOFVpDV[4], digits = 4)),
+    paste("S-W test:", format(shapiro.test(IDStat5[, "OFVpDV"])$p.value, digits = 4))
+  )
 
-  PrinTxt(16, 1, "Summary of Individual OFV per DV", Cex = 0.9)
-  PrinTxt(18, 3, paste("Minimum :", sIOFVpDV[1]))
-  PrinTxt(19, 3, paste("1st Qu. :", sIOFVpDV[2]))
-  PrinTxt(20, 3, paste("Median  :", sIOFVpDV[3]))
-  PrinTxt(21, 3, paste("Mean    :", sIOFVpDV[4]))
-  PrinTxt(22, 3, paste("3rd Qu. :", sIOFVpDV[5]))
-  PrinTxt(23, 3, paste("Maximum :", sIOFVpDV[6]))
-  PrinTxt(24, 3, paste("Std Dev :", format(sdIOFVpDV, digits = 4)))
-  PrinTxt(25, 3, paste("Coe Var :", format(sdIOFVpDV / sIOFVpDV[4], digits = 4)))
-  PrinTxt(26, 3, paste("S-W test:", format(shapiro.test(IDStat5[, "OFVpDV"])$p.value, digits = 4)))
+  headerInfoLines <- c(
+    "ID     : Subject ID",
+    "iOFV   : Individual Objective Function Value",
+    "nRec   : Number of Records",
+    "nDV    : Number of DV(Dependent Variable) Records",
+    "nMDV   : Number of Missing DV Records",
+    "nAMT   : Number of Dosing(AMT) Records",
+    "nEVIDx : Number of Records with EVID == x",
+    "FRecD  : Is the first record is a dosing record?",
+    "OFVpDV : Objective Function Value per DV",
+    "*Table is ordered by decreasing OFVpDV"
+  )
 
-  PrinTxt(28, 1, "Header information for the next table", Cex = 0.9)
-  PrinTxt(30, 3, "ID     : Subject ID")
-  PrinTxt(31, 3, "iOFV   : Individual Objective Function Value")
-  PrinTxt(32, 3, "nRec   : Number of Records")
-  PrinTxt(33, 3, "nDV    : Number of DV(Dependent Variable) Records")
-  PrinTxt(34, 3, "nMDV   : Number of Missing DV Records")
-  PrinTxt(35, 3, "nAMT   : Number of Dosing(AMT) Recods")
-  PrinTxt(36, 3, "nEVIDx : Number of Records with EVID == x")
-  PrinTxt(37, 3, "FRecD  : Is the first record is a dosing record?")
-  PrinTxt(38, 3, "OFVpDV : Objective Function Value per DV")
-  PrinTxt(39, 3, "*Table is ordered by decreasing OFVpDV", Cex = 0.7)
+  abbrevLines <- c(
+    "PRED   : Typical Prediction",
+    "IPRE   : Individual Prediction",
+    "WRES   : Weighted Residual",
+    "CWRE   : Conditional Weighted Residual",
+    "IWRE   : Individual Weighted Residual",
+    "LL     : Lower Limit of Confidence Interval",
+    "UL     : Upper Limit of Confidence Interval",
+    "RSE    : Relative Standard Error (SE / Point Estimate)",
+    "SHR    : Shrinkage (Observed SD / Estimated SD)",
+    "ZERO   : Does the confidence interval include 0?",
+    "ONE    : Does the confidence interval include 1?"
+  )
 
-  PrinTxt(41, 1, "Abbreviations for Tables", Cex = 0.9)
-  PrinTxt(43, 3, "PRED   : Typical Prediction")
-  PrinTxt(44, 3, "IPRE   : Individual Prediction")
-  PrinTxt(45, 3, "WRES   : Weighted Residual")
-  PrinTxt(46, 3, "CWRE   : Conditional Weighted Residual")
-  PrinTxt(47, 3, "IWRE   : Individual Weighted Residual")
-  PrinTxt(48, 3, "LL     : Lower Limit of Confidence Interval")
-  PrinTxt(49, 3, "UL     : Upper Limit of Confidence Interval")
-  PrinTxt(50, 3, "RSE    : Relative Standard Error (SE / Point Estimate)")
-  PrinTxt(51, 3, "SHR    : Shrinkage (Observed SD / Estimated SD)")
-  PrinTxt(52, 3, "ZERO   : Does the confidence interval include 0?")
-  PrinTxt(53, 3, "ONE    : Does the confidence interval include 1?")
+  # Per-subject iOFV table (was capture.output(IDStat5) hand-painted via split.screen).
+  # Round only for display; computation above is untouched.
+  iOFVtab <- IDStat5
+  rownames(iOFVtab) <- NULL              # clean sequential rank ordering
+  iOFVtab$iOFV   <- round(iOFVtab$iOFV, 4)
+  iOFVtab$OFVpDV <- round(iOFVtab$OFVpDV, 4)
 
-  par(defpar)
+  blocks <- list(
+    block_para("Summary 1 - Objective Function Values", size = 16, font = 2),
+    block_rule(),
+    block_para(probLine, size = 10),
+    block_spacer(4),
+    block_keep(list(
+      block_para("Objective Function Values", size = 13, font = 2),
+      block_pre(ofvLines, size = 9))),
+    block_spacer(6),
+    block_keep(list(
+      block_para("Summary of Individual OFV per DV", size = 13, font = 2),
+      block_pre(iofvSumLines, size = 9))),
+    block_spacer(6),
 
-  screen(2)
-  x <- IDStat5[, "OFVpDV"]
-  y <- jitter(rep(0, length(x)))
-  plot(x, y, ylim = c(-0.2, 0.2), xaxt = "n", yaxt = "n", xlab = "", ylab = "", bty = "n", cex = 0.4)
-  lines(c(sIOFVpDV[2], sIOFVpDV[2]), c(-0.05, +0.05))
-  lines(c(sIOFVpDV[3], sIOFVpDV[3]), c(-0.05, +0.05))
-  lines(c(sIOFVpDV[4], sIOFVpDV[4]), c(-0.07, +0.07))
-  lines(c(sIOFVpDV[5], sIOFVpDV[5]), c(-0.05, +0.05))
-  lines(c(sIOFVpDV[2], sIOFVpDV[5]), c(-0.05, -0.05))
-  lines(c(sIOFVpDV[2], sIOFVpDV[5]), c(+0.05, +0.05))
-  lines(c(sIOFVpDV[4] - 2 * sdIOFVpDV, sIOFVpDV[4] - 2 * sdIOFVpDV), c(-0.03, +0.03))
-  lines(c(sIOFVpDV[4] + 2 * sdIOFVpDV, sIOFVpDV[4] + 2 * sdIOFVpDV), c(-0.03, +0.03))
+    # --- 3-panel iOFV diagnostic (boxplot-style / histogram / qq) -----------
+    block_keep(list(
+      block_para("Distribution of Individual OFV per DV", size = 13, font = 2),
+      block_plot({
+        x <- IDStat5[, "OFVpDV"]
+        y <- jitter(rep(0, length(x)))
+        plot(x, y, ylim = c(-0.2, 0.2), xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+             bty = "n", cex = 0.4, main = "iOFV per DV (box summary)")
+        lines(c(sIOFVpDV[2], sIOFVpDV[2]), c(-0.05, +0.05))
+        lines(c(sIOFVpDV[3], sIOFVpDV[3]), c(-0.05, +0.05))
+        lines(c(sIOFVpDV[4], sIOFVpDV[4]), c(-0.07, +0.07))
+        lines(c(sIOFVpDV[5], sIOFVpDV[5]), c(-0.05, +0.05))
+        lines(c(sIOFVpDV[2], sIOFVpDV[5]), c(-0.05, -0.05))
+        lines(c(sIOFVpDV[2], sIOFVpDV[5]), c(+0.05, +0.05))
+        lines(c(sIOFVpDV[4] - 2 * sdIOFVpDV, sIOFVpDV[4] - 2 * sdIOFVpDV), c(-0.03, +0.03))
+        lines(c(sIOFVpDV[4] + 2 * sdIOFVpDV, sIOFVpDV[4] + 2 * sdIOFVpDV), c(-0.03, +0.03))
+      }, height = 150, mar = c(3, 2, 2, 1)))),
+    block_plot({
+      var.data <- IDStat5[, "OFVpDV"]
+      h.res <- hist(var.data, plot = FALSE)
+      d.res <- density(var.data, na.rm = TRUE)
+      h.rat <- max(h.res$counts) / max(h.res$density)
+      xrange <- range(d.res$x)
+      yrange <- c(0, max(h.res$counts, max(d.res$y) * h.rat))
+      plot(h.res, xlim = xrange, ylim = yrange, xlab = "IOFV per DV", main = "")
+      lines(d.res$x, h.rat * d.res$y)
+    }, height = 190, mar = c(4, 4, 2, 1)),
+    block_plot({
+      qqnorm(IDStat5[, "OFVpDV"], datax = TRUE, main = "", ylab = "IOFV per DV", cex = 0.4)
+    }, height = 190, mar = c(4, 4, 2, 1)),
+    block_spacer(6),
 
-  par(defpar)
+    block_keep(list(
+      block_para("Header information for the next table", size = 13, font = 2),
+      block_pre(headerInfoLines, size = 9))),
+    block_spacer(6),
+    block_keep(list(
+      block_para("Abbreviations for Tables", size = 13, font = 2),
+      block_pre(abbrevLines, size = 9))),
+    block_spacer(6),
 
-  screen(3)
-  var.data <- IDStat5[, "OFVpDV"]
-  h.res <- hist(var.data, plot = FALSE)
-  d.res <- density(var.data, na.rm = TRUE)
-  h.rat <- max(h.res$counts) / max(h.res$density)
-  xrange <- range(d.res$x)
-  yrange <- c(0, max(h.res$counts, max(d.res$y) * h.rat))
-  plot(h.res, xlim = xrange, ylim = yrange, xlab = "IOFV per DV", main = "")
-  lines(d.res$x, h.rat * d.res$y)
+    block_keep(list(
+      block_para("Table of Individual Objective Function Values and Records Summary",
+                 size = 13, font = 2),
+      block_para("*ordered by decreasing OFVpDV", size = 8))),
+    block_table(iOFVtab, size = 8, family = "mono")
+  )
 
-  screen(4)
-  qqnorm(IDStat5[, "OFVpDV"], datax = TRUE, main = "", ylab = "IOFV per DV", cex = 0.4)
+  doc <- sp_new(file, paper = "letter", family = "Courier", size = 10)
+  frame_set(doc, top = doc$H - 45, bottom = 45, left = 45, right = doc$W - 45)
+  flow_run(doc, Filter(Negate(is.null), blocks),
+           footer = block_para("CONFIDENTIAL", size = 8, align = "center"))
+  np <- doc$page_no
+  sp_close(doc)
 
-  close.screen(all.screens = TRUE)
-
-  nRow <- 55
-  AddPage(Cex = 0.8)
-  PrinTxt(1, 1, "Table of Individual Objective Function Values and Records Summary", Cex = 1)
-  PrinTxt(2, 1, IDStat6[1])
-
-  for (i in 2:length(IDStat6)) {
-    if (i %% (nRow - 1) == 1) {
-      AddPage(Cex = 0.8)
-      PrinTxt(1, 1, IDStat6[1])
-    }
-    PrinTxt((i - 1) %% (nRow - 1) + 2, 1, IDStat6[i])
-  }
-
-  ClosePDF()
-  message("S1-OFV.PDF generated.")
+  message(paste0(file, " generated."))
+  invisible(list(file = file, pages = np, nID = nID, nDV = nDV, OFV = OFV))
 }

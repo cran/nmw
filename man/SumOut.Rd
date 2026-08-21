@@ -7,14 +7,20 @@
 SumOut(FileExt = ".CTL", RunExt = ".R76", OutExt = ".OUT")
 }
 \arguments{
-\item{FileExt}{character, control file extension}
+\item{FileExt}{character, control file extension (default ".CTL")}
 
-\item{RunExt}{character, run folder extension}
+\item{RunExt}{character, run folder extension matching the NONMEM
+`nmfe<ver>.bat` output directory.  Default ".R76" for NONMEM 7.6.
+Use ".R75" or ".R74" for older versions.}
 
-\item{OutExt}{character, output file extension}
+\item{OutExt}{character, output file extension (default ".OUT")}
 }
 \value{
-data.frame with summary of all runs
+data.frame with one row per run; columns include OutName,
+  Parent, EstMethod, Formula, Minimize, Reason, OFV, SE, Parameter,
+  Theta, FixedTheta, Eta, Eps, OffDiagOmega, nDV, AICc, plus tree
+  layout columns (NextSib, FirstKid, LastKid, LOrder, Depth, Pos).
+  Returns invisible NULL with a warning if no run folders are found.
 }
 \description{
 Scans subdirectories matching RunExt and collects summary metrics

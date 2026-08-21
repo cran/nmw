@@ -4,10 +4,19 @@
 \alias{nmw_report_indipk}
 \title{Generate Individual PK Parameter Report (SC-IndiPK.PDF)}
 \usage{
-nmw_report_indipk(run_dir = getwd())
+nmw_report_indipk(run_dir = getwd(), file = "SC-IndiPK.PDF", model = NULL)
 }
 \arguments{
 \item{run_dir}{character, path to the NONMEM run directory (default: current directory)}
+
+\item{file}{character, output PDF filename}
+
+\item{model}{accepted for a uniform report-function interface; unused because
+this report always reads \file{patab}}
+}
+\value{
+Invisibly, a list with the output \code{file}, number of \code{pages},
+parameter count and names, and subject count.
 }
 \description{
 Generates a PDF report with individual PK parameter distributions

@@ -9,7 +9,7 @@
 ParseOut <- function(TagString, RawRead) {
   Inter <- grep(TagString, RawRead, value = TRUE)
   if (length(Inter) > 0) {
-    return(strsplit(Inter, ":")[[1]][2])
+    return(strsplit(Inter[length(Inter)], ":")[[1]][2])  # LAST match = last $EST (chained-safe)
   } else {
     return(0)
   }
@@ -117,21 +117,15 @@ BtwTagVal <- function(Tag1, Tag2, RawRead) {
 #' @return character vector of lines between tags
 #' @keywords internal
 BtwTagLines <- function(Tag1, Tag2, RawRead) {
-  Line1 <- grep(Tag1, RawRead)
-  Line2a <- grep(Tag2, RawRead)
-
-  if (length(Line1) > 0) {
-    if (length(Line2a) > 1) {
-      i <- 1
-      while (Line2a[i] < Line1) i <- i + 1
-      Line2 <- Line2a[i]
-    } else {
-      Line2 <- Line2a
-    }
-    return(RawRead[(Line1 + 1):(Line2 - 1)])
-  } else {
-    return(0)
-  }
+  L1 <- grep(Tag1, RawRead)
+  L2 <- grep(Tag2, RawRead)
+  if (length(L1) == 0 || length(L2) == 0) return(0)
+  Line1 <- L1[length(L1)]            # LAST opening tag = last $EST block (chained-safe)
+  L2a <- L2[L2 > Line1]
+  if (length(L2a) == 0) return(0)
+  Line2 <- L2a[1]
+  if (Line2 - Line1 <= 1) return(0)
+  return(RawRead[(Line1 + 1):(Line2 - 1)])
 }
 
 
@@ -146,9 +140,13 @@ BtwTagLines <- function(Tag1, Tag2, RawRead) {
 BtwTagVals <- function(Tag, RawRead) {
   Tag1 <- paste("<", Tag, ">", sep = "")
   Tag2 <- paste("</", Tag, ">", sep = "")
-  Line1 <- grep(Tag1, RawRead)
-  Line2 <- grep(Tag2, RawRead)
-  if (length(Line1) != 0 && length(Line2) != 0) {
+  L1 <- grep(Tag1, RawRead)
+  L2 <- grep(Tag2, RawRead)
+  if (length(L1) != 0 && length(L2) != 0) {
+    Line1 <- L1[length(L1)]                 # LAST opening tag = last $EST block (chained-safe)
+    L2a <- L2[L2 > Line1]
+    if (length(L2a) == 0) return(0)
+    Line2 <- L2a[1]
     TmpRaw <- RawRead[(Line1 + 1):(Line2 - 1)]
     nVal <- length(TmpRaw)
     Vals <- rep(0, nVal)

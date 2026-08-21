@@ -78,8 +78,8 @@ NMVarStat <- function(NMTable) {
     VarStat[i, "nUniq"] <- nUniq
     VarStat[i, "Min"] <- min(UniqData, na.rm = TRUE)
     VarStat[i, "Max"] <- max(UniqData, na.rm = TRUE)
-    VarStat[i, "ALLNA"] <- all(is.na(UniqData))
-    VarStat[i, "ALLSame"] <- (length(unique(UniqData)) == 1)
+    VarStat[i, "ALLNA"] <- AllNA(UniqData)
+    VarStat[i, "ALLSame"] <- AllSame(UniqData)
     VarStat[i, "ALLInt"] <- is.integer(UniqData)
     VarStat[i, "ALLReal"] <- is.double(UniqData)
     VarStat[i, "DepID"] <- FuncDep(NMTable, "ID", paste(VarNames[i]))

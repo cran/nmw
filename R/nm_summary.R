@@ -172,55 +172,36 @@ SumOut <- function(FileExt = ".CTL", RunExt = ".R76", OutExt = ".OUT") {
     }
   }
 
-  Roots <- MDL[MDL[, "Parent"] == "", ]
-  NextName <- ""
-  nRoot <- nrow(Roots)
-  if (nRoot > 0) NextName <- Roots[1, "OutName"]
-
-  cDepth <- 0; cPos <- 0
-  for (cLOrder in 1:nCtl) {
-    cOutName <- MDL[MDL[, "OutName"] == NextName, "OutName"]
-    cIndex <- which(MDL[, "OutName"] == cOutName)
-    MDL[cIndex, "LOrder"] <- cLOrder - 1
-    MDL[cIndex, "Depth"] <- cDepth
-    MDL[cIndex, "Pos"] <- cPos
-
-    cFirstKid <- MDL[cIndex, "FirstKid"]
-    cNextSib <- MDL[cIndex, "NextSib"]
-    if (cFirstKid != "") {
-      NextName <- cFirstKid
-      cDepth <- cDepth + 1
-    } else if (cNextSib != "") {
-      NextName <- cNextSib
-      cPos <- cPos + 1
-    } else {
-      ParName <- MDL[cIndex, "Parent"]
-      SibName <- ""
-      fFound <- FALSE
-      while (fFound == FALSE & ParName != "") {
-        cDepth <- cDepth - 1
-        cIndex <- which(MDL[, "OutName"] == ParName)
-        SibName <- MDL[cIndex, "NextSib"]
-        if (SibName != "") {
-          NextName <- SibName
-          fFound <- TRUE
-          cPos <- cPos + 1
-        } else {
-          ParName <- MDL[cIndex, "Parent"]
-        }
-      }
+  # Robust forest layout: assign Depth, Pos, LOrder by DFS over ALL roots.
+  # Handles a forest (multiple roots, e.g. parents living in another folder),
+  # disconnected components, and parent-cycles. The previous single-traversal
+  # left unvisited nodes at the initial (Depth=0, Pos=0) -> nodes overlapped.
+  for (i in 1:nCtl) {                      # self-parent guard (would be unreachable)
+    if (!is.na(MDL[i, "Parent"]) && MDL[i, "Parent"] == MDL[i, "OutName"]) {
+      MDL[i, "Parent"] <- ""
     }
   }
-
-  for (i in nCtl:1) {
-    if (MDL[i, "FirstKid"] != "") {
-      cFirstKid <- MDL[i, "FirstKid"]
-      cLastKid <- MDL[i, "LastKid"]
-      FirstKidPos <- MDL[which(MDL[, "OutName"] == cFirstKid), "Pos"]
-      LastKidPos <- MDL[which(MDL[, "OutName"] == cLastKid), "Pos"]
-      MDL[i, "Pos"] <- (FirstKidPos + LastKidPos) / 2
+  Visited <- logical(nCtl)
+  cLOrder <- 0L
+  cLeaf <- 0                               # global leaf counter -> unique column per leaf
+  LayoutNode <- function(idx, depth) {
+    if (Visited[idx]) return(invisible(NULL))   # cycle guard
+    Visited[idx] <<- TRUE
+    MDL[idx, "Depth"] <<- depth
+    MDL[idx, "LOrder"] <<- cLOrder
+    cLOrder <<- cLOrder + 1L
+    KidIdx <- which(MDL[, "Parent"] == MDL[idx, "OutName"] & !Visited)
+    if (length(KidIdx) == 0) {             # leaf: take next free column
+      MDL[idx, "Pos"] <<- cLeaf
+      cLeaf <<- cLeaf + 1
+    } else {                               # internal: centre over children
+      for (k in KidIdx) LayoutNode(k, depth + 1)
+      KidPos <- MDL[KidIdx, "Pos"]
+      MDL[idx, "Pos"] <<- (min(KidPos) + max(KidPos)) / 2
     }
   }
+  for (r in which(MDL[, "Parent"] == "")) LayoutNode(r, 0)  # every root + its subtree
+  for (i in which(!Visited))              LayoutNode(i, 0)  # any node left in a cycle
 
   setwd(WorkDir)
   write.csv(MDL, paste0(GetCurModelName(), ".csv"), row.names = FALSE, na = "")
